@@ -8,6 +8,7 @@
     "Jan Aagaard Meier <janzeh@gmail.com>",
     "Daniel Durante <me@danieldurante.com>",
     "Mick Hansen <mick.kasper.hansen@gmail.com>",
+    "Bimal Jha <bjha@rocketsoftware.com>",
     "Sushant Dhiman <sushantdhiman@outlook.com>"
   ],
   "repository": {
@@ -70,6 +71,7 @@
     "sinon-chai": "^3.2.0",
     "sqlite3": "^4.0.2",
     "tedious": "^2.x",
+    "ibm_db": "^2.x",
     "uuid-validate": "^0.0.3",
     "validate-commit-msg": "^2.12.2"
   },
@@ -79,6 +81,7 @@
     "postgresql",
     "postgres",
     "mssql",
+    "db2",
     "orm",
     "nodejs",
     "object relational mapper"
