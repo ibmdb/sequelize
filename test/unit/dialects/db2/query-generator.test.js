@@ -657,20 +657,20 @@ if (dialect === 'db2') {
       showIndexesQuery: [
         {
           arguments: ['User'],
-          expectation: 'SHOW INDEX FROM `User`'
+          expectation: "SELECT * FROM SYSIBM.SYSINDEXES WHERE TBNAME = 'User';"
         }, {
           arguments: ['User', { database: 'sequelize' }],
-          expectation: 'SHOW INDEX FROM `User` FROM `sequelize`'
+          expectation: "SELECT * FROM SYSIBM.SYSINDEXES WHERE TBNAME = 'User';" 
         }
       ],
 
       removeIndexQuery: [
         {
           arguments: ['User', 'user_foo_bar'],
-          expectation: 'DROP INDEX `user_foo_bar` ON `User`'
+          expectation: 'DROP INDEX user_foo_bar'
         }, {
           arguments: ['User', ['foo', 'bar']],
-          expectation: 'DROP INDEX `user_foo_bar` ON `User`'
+          expectation: 'DROP INDEX user_foo_bar'
         }
       ],
       getForeignKeyQuery: [

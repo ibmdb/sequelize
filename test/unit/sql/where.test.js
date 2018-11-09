@@ -113,6 +113,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
 
     testsql('deleted', null, {
       default: '`deleted` IS NULL',
+      db2: 'deleted IS NULL',
       postgres: '"deleted" IS NULL',
       mssql: '[deleted] IS NULL'
     });
@@ -150,6 +151,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
         postgres: '"field" = E\'\\\\x53657175656c697a65\'',
         sqlite: "`field` = X'53657175656c697a65'",
         mysql: "`field` = X'53657175656c697a65'",
+        db2: "field = 0x53657175656c697a65",
         mssql: '[field] = 0x53657175656c697a65'
       });
     });

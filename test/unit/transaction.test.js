@@ -41,6 +41,9 @@ describe('Transaction', function() {
       sqlite: [
         'BEGIN DEFERRED TRANSACTION;'
       ],
+      db2: [
+        'BEGIN TRANSACTION;'
+      ],
       mssql: [
         'BEGIN TRANSACTION;'
       ]
