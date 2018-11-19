@@ -19,8 +19,8 @@ Sequelize is a promise-based Node.js ORM for Postgres, MySQL, Db2, SQLite and Mi
 We have started v5 beta release process. Hopefully this will cover full [v5 milestone](https://github.com/sequelize/sequelize/milestone/18). You can find upgrade guide and changelog [here](https://github.com/sequelize/sequelize/blob/master/docs/upgrade-to-v5.md)
 
 ```bash
-npm install --save sequelize # will install v4
-npm install --save sequelize@next # will install v5-beta
+npm install --save git+https://git@github.com/ibmdb/sequelize.git
+npm install --save ibm_db
 ```
 
 ## Table of Contents
