@@ -110,7 +110,7 @@ if (dialect === 'db2') {
         },
         {
           arguments: [{id: {type: 'INTEGER', allowNull: false, autoIncrement: true, defaultValue: 1, references: { model: 'Bar' }, onDelete: 'CASCADE', onUpdate: 'RESTRICT'}}],
-          expectation: {id: 'INTEGER NOT NULL auto_increment DEFAULT 1 REFERENCES Bar (id) ON DELETE CASCADE ON UPDATE RESTRICT'}
+          expectation: {id: 'INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY(START WITH 1, INCREMENT BY 1) DEFAULT 1 REFERENCES Bar (id) ON DELETE CASCADE ON UPDATE RESTRICT'}
         }
       ],
 
@@ -129,46 +129,46 @@ if (dialect === 'db2') {
         },
         {
           arguments: ['myTable', {title: 'VARCHAR(255)', name: 'VARCHAR(255)'}, {engine: 'MyISAM'}],
-          expectation: 'CREATE TABLE IF NOT EXISTS myTable (title VARCHAR(255), name VARCHAR(255));'
+          expectation: 'CREATE TABLE myTable (title VARCHAR(255), name VARCHAR(255));'
         },
         {
           arguments: ['myTable', {title: 'VARCHAR(255)', name: 'VARCHAR(255)'}, {charset: 'utf8', collate: 'utf8_unicode_ci'}],
-          expectation: 'CREATE TABLE IF NOT EXISTS myTable (title VARCHAR(255), name VARCHAR(255));'
+          expectation: 'CREATE TABLE myTable (title VARCHAR(255), name VARCHAR(255));'
         },
         {
           arguments: ['myTable', {title: 'VARCHAR(255)', name: 'VARCHAR(255)'}, {charset: 'latin1'}],
-          expectation: 'CREATE TABLE IF NOT EXISTS myTable (title VARCHAR(255), name VARCHAR(255)) ENGINE=InnoDB DEFAULT CHARSET=latin1;'
+          expectation: 'CREATE TABLE myTable (title VARCHAR(255), name VARCHAR(255));'
         },
         {
           arguments: ['myTable', {title: 'ENUM("A", "B", "C")', name: 'VARCHAR(255)'}, {charset: 'latin1'}],
-          expectation: 'CREATE TABLE IF NOT EXISTS myTable (title ENUM(\"A\", \"B\", \"C\"), name VARCHAR(255)) ENGINE=InnoDB DEFAULT CHARSET=latin1;'
+          expectation: 'CREATE TABLE myTable (title ENUM(\"A\", \"B\", \"C\"), name VARCHAR(255));'
         },
         {
           arguments: ['myTable', {title: 'VARCHAR(255)', name: 'VARCHAR(255)'}, { rowFormat: 'default' }],
-          expectation: 'CREATE TABLE IF NOT EXISTS myTable (title VARCHAR(255), name VARCHAR(255)) ENGINE=InnoDB ROW_FORMAT=default;'
+          expectation: 'CREATE TABLE myTable (title VARCHAR(255), name VARCHAR(255));'
         },
         {
           arguments: ['myTable', {title: 'VARCHAR(255)', name: 'VARCHAR(255)', id: 'INTEGER PRIMARY KEY'}],
-          expectation: 'CREATE TABLE IF NOT EXISTS myTable (title VARCHAR(255), name VARCHAR(255), id INTEGER , PRIMARY KEY (id)) ENGINE=InnoDB;'
+          expectation: 'CREATE TABLE myTable (title VARCHAR(255), name VARCHAR(255), id INTEGER , PRIMARY KEY (id));'
         },
         {
           arguments: ['myTable', {title: 'VARCHAR(255)', name: 'VARCHAR(255)', otherId: 'INTEGER REFERENCES otherTable (id) ON DELETE CASCADE ON UPDATE NO ACTION'}],
-          expectation: 'CREATE TABLE IF NOT EXISTS myTable (title VARCHAR(255), name VARCHAR(255), otherId INTEGER, FOREIGN KEY (otherId) REFERENCES otherTable (id) ON DELETE CASCADE ON UPDATE NO ACTION) ENGINE=InnoDB;'
+          expectation: 'CREATE TABLE myTable (title VARCHAR(255), name VARCHAR(255), otherId INTEGER, FOREIGN KEY (otherId) REFERENCES otherTable (id) ON DELETE CASCADE ON UPDATE NO ACTION);'
         },
         {
           arguments: ['myTable', {title: 'VARCHAR(255)', name: 'VARCHAR(255)'}, {uniqueKeys: [{fields: ['title', 'name'], customIndex: true}]}],
-          expectation: 'CREATE TABLE IF NOT EXISTS myTable (title VARCHAR(255), name VARCHAR(255), UNIQUE uniq_myTable_title_name (title, name)) ENGINE=InnoDB;'
+          expectation: 'CREATE TABLE myTable (title VARCHAR(255), name VARCHAR(255), CONSTRAINT uniq_myTable_title_name UNIQUE (title, name));'
         },
         {
           arguments: ['myTable', {id: 'INTEGER auto_increment PRIMARY KEY'}, {initialAutoIncrement: 1000001}],
-          expectation: 'CREATE TABLE IF NOT EXISTS myTable (id INTEGER auto_increment , PRIMARY KEY (id)) ENGINE=InnoDB AUTO_INCREMENT=1000001;'
+          expectation: 'CREATE TABLE myTable (id INTEGER auto_increment , PRIMARY KEY (id)) AUTO_INCREMENT=1000001;'
         }
       ],
 
       dropTableQuery: [
         {
           arguments: ['myTable'],
-          expectation: 'DROP TABLE IF EXISTS myTable;'
+          expectation: 'DROP TABLE myTable;'
         }
       ],
 
@@ -247,7 +247,7 @@ if (dialect === 'db2') {
               ]
             };
           }],
-          expectation: "SELECT * FROM myTable ORDER BY f1(myTable.id) DESC, f2(12, 'lalala', '2011-03-27 10:01:55') ASC;",
+expectation: "SELECT * FROM myTable ORDER BY f1(myTable.id) DESC, f2(12, 'lalala', '2011-03-27 10:01:55.000 +00:00') ASC;",
           context: QueryGenerator,
           needsSequelize: true
         }, {
@@ -348,9 +348,9 @@ if (dialect === 'db2') {
           expectation: 'SELECT * FROM myTable;',
           context: QueryGenerator
         }, {
-          title: 'uses limit 0',
+          title: 'ignore limit 0',
           arguments: ['myTable', {limit: 0}],
-          expectation: 'SELECT * FROM myTable FETCH FIRST 0 ROWS ONLY;',
+          expectation: 'SELECT * FROM myTable;',
           context: QueryGenerator
         }, {
           title: 'multiple where arguments',
@@ -375,7 +375,7 @@ if (dialect === 'db2') {
         }, {
           title: 'buffer as where argument',
           arguments: ['myTable', {where: { field: new Buffer('Sequelize')}}],
-          expectation: "SELECT * FROM myTable WHERE myTable.field = X'53657175656c697a65';",
+          expectation: "SELECT * FROM myTable WHERE myTable.field = 0x53657175656c697a65;",
           context: QueryGenerator
         }, {
           title: 'use != if ne !== null',
@@ -549,10 +549,7 @@ if (dialect === 'db2') {
           expectation: "INSERT INTO myTable (name,value) VALUES ('foo',true),('bar',false);"
         }, {
           arguments: ['myTable', [{name: 'foo'}, {name: 'bar'}], {ignoreDuplicates: true}],
-          expectation: "INSERT IGNORE INTO myTable (name) VALUES ('foo'),('bar');"
-        }, {
-          arguments: ['myTable', [{name: 'foo'}, {name: 'bar'}], {updateOnDuplicate: ['name']}],
-          expectation: "INSERT INTO myTable (name) VALUES ('foo'),('bar') ON DUPLICATE KEY UPDATE name=VALUES(name);"
+          expectation: "INSERT INTO myTable (name) VALUES ('foo'),('bar');"
         }
       ],
 
