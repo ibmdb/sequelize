@@ -29,7 +29,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
       model: {primaryKeyField: 'id', name: 'tableRef'}
     }, {
       default: ' LIMIT 10',
-      db2: ' ORDER BY tableRef.id FETCH FIRST 10 ROWS ONLY',
+      db2: ' FETCH FIRST 10 ROWS ONLY',
       mssql: ' ORDER BY [tableRef].[id] OFFSET 0 ROWS FETCH NEXT 10 ROWS ONLY'
     });
 

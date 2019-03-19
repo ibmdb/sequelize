@@ -1986,7 +1986,7 @@ describe(Support.getTestDialectTeaser('BelongsToMany'), () => {
       return this.sequelize.sync({force: true}).then(() => {
         return self.sequelize.getQueryInterface().showAllTables();
       }).then(result => {
-        if (dialect === 'mssql' /* current.dialect.supports.schemas */) {
+        if (dialect === 'mssql' || dialect === 'db2' /* current.dialect.supports.schemas */) {
           result = _.map(result, 'tableName');
         }
 
@@ -2006,7 +2006,7 @@ describe(Support.getTestDialectTeaser('BelongsToMany'), () => {
       return this.sequelize.sync({force: true}).then(() => {
         return self.sequelize.getQueryInterface().showAllTables();
       }).then(result => {
-        if (dialect === 'mssql' /* current.dialect.supports.schemas */) {
+        if (dialect === 'mssql' || dialect === 'db2' /* current.dialect.supports.schemas */) {
           result = _.map(result, 'tableName');
         }
 

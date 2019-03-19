@@ -38,6 +38,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
 
       testsql('STRING(1234).BINARY', DataTypes.STRING(1234).BINARY, {
         default: 'VARCHAR(1234) BINARY',
+        db2: 'VARCHAR(1234) FOR BIT DATA',
         sqlite: 'VARCHAR BINARY(1234)',
         mssql: 'BINARY(1234)',
         postgres: 'BYTEA'
@@ -45,6 +46,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
 
       testsql('STRING.BINARY', DataTypes.STRING.BINARY, {
         default: 'VARCHAR(255) BINARY',
+        db2: 'VARCHAR(255) FOR BIT DATA',
         sqlite: 'VARCHAR BINARY(255)',
         mssql: 'BINARY(255)',
         postgres: 'BYTEA'
@@ -64,30 +66,35 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
     suite('TEXT', () => {
       testsql('TEXT', DataTypes.TEXT, {
         default: 'TEXT',
+        db2: 'VARCHAR(32672)',
         mssql: 'NVARCHAR(MAX)' // in mssql text is actually representing a non unicode text field
       });
 
       testsql('TEXT("tiny")', DataTypes.TEXT('tiny'), {
         default: 'TEXT',
         mssql: 'NVARCHAR(256)',
+        db2: 'VARCHAR(256)',
         mysql: 'TINYTEXT'
       });
 
       testsql('TEXT({ length: "tiny" })', DataTypes.TEXT({ length: 'tiny' }), {
         default: 'TEXT',
         mssql: 'NVARCHAR(256)',
+        db2: 'VARCHAR(256)',
         mysql: 'TINYTEXT'
       });
 
       testsql('TEXT("medium")', DataTypes.TEXT('medium'), {
         default: 'TEXT',
         mssql: 'NVARCHAR(MAX)',
+        db2: 'VARCHAR(8192)',
         mysql: 'MEDIUMTEXT'
       });
 
       testsql('TEXT("long")', DataTypes.TEXT('long'), {
         default: 'TEXT',
         mssql: 'NVARCHAR(MAX)',
+        db2: 'CLOB(65536)',
         mysql: 'LONGTEXT'
       });
 
@@ -137,6 +144,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
     suite('BOOLEAN', () => {
       testsql('BOOLEAN', DataTypes.BOOLEAN, {
         postgres: 'BOOLEAN',
+        db2: 'BOOLEAN',
         mssql: 'BIT',
         mysql: 'TINYINT(1)',
         sqlite: 'TINYINT(1)'
@@ -177,7 +185,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
         postgres: 'TIMESTAMP WITH TIME ZONE',
         mssql: 'DATETIMEOFFSET',
         mysql: 'DATETIME(6)',
-        db2: 'TIMESTAMP',
+        db2: 'TIMESTAMP(6)',
         sqlite: 'DATETIME'
       });
 
@@ -221,6 +229,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
     suite('UUID', () => {
       testsql('UUID', DataTypes.UUID, {
         postgres: 'UUID',
+        db2: 'CHAR(36) FOR BIT DATA',
         mssql: 'CHAR(36)',
         mysql: 'CHAR(36) BINARY',
         sqlite: 'UUID'
@@ -321,6 +330,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
     suite('NOW', () => {
       testsql('NOW', DataTypes.NOW, {
         default: 'NOW',
+        db2: 'CURRENT TIME',
         mssql: 'GETDATE()'
       });
     });
@@ -581,6 +591,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
           expect: {
             default: 'SMALLINT UNSIGNED',
             postgres: 'SMALLINT',
+            db2: 'SMALLINT',
             mssql: 'SMALLINT'
           }
         },

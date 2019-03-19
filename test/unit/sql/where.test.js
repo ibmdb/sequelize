@@ -58,6 +58,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
       expectsql(sql.whereQuery({id: 1}, {prefix: current.literal(sql.quoteTable.call(current.dialect.QueryGenerator, {schema: 'yolo', tableName: 'User'}))}), {
         default: 'WHERE [yolo.User].[id] = 1',
         postgres: 'WHERE "yolo"."User"."id" = 1',
+        db2: 'WHERE "yolo"."User"."id" = 1',
         mssql: 'WHERE [yolo].[User].[id] = 1'
       });
     });
@@ -113,7 +114,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
 
     testsql('deleted', null, {
       default: '`deleted` IS NULL',
-      db2: 'deleted IS NULL',
+      db2: '"deleted" IS NULL',
       postgres: '"deleted" IS NULL',
       mssql: '[deleted] IS NULL'
     });
@@ -151,7 +152,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
         postgres: '"field" = E\'\\\\x53657175656c697a65\'',
         sqlite: "`field` = X'53657175656c697a65'",
         mysql: "`field` = X'53657175656c697a65'",
-        db2: "field = 0x53657175656c697a65",
+        db2: '"field" = 0x53657175656c697a65',
         mssql: '[field] = 0x53657175656c697a65'
       });
     });

@@ -30,7 +30,7 @@ describe(Support.getTestDialectTeaser('SQL'), () => {
           query: {
             mssql: 'declare @tmp table ([id] INTEGER,[user_name] NVARCHAR(255));UPDATE [users] SET [user_name]=$1 OUTPUT INSERTED.[id],INSERTED.[user_name] into @tmp WHERE [id] = $2;select * from @tmp',
             postgres: 'UPDATE "users" SET "user_name"=$1 WHERE "id" = $2 RETURNING *',
-            db2: 'UPDATE users SET user_name=$1 WHERE id = $2',
+            db2: 'SELECT * FROM FINAL TABLE(UPDATE "users" SET "user_name"=$1 WHERE "id" = $2)',
             default: 'UPDATE `users` SET `user_name`=$1 WHERE `id` = $2'
           },
           bind: {
@@ -57,7 +57,7 @@ describe(Support.getTestDialectTeaser('SQL'), () => {
           mssql: 'UPDATE TOP(1) [Users] SET [username]=$1 OUTPUT INSERTED.* WHERE [username] = $2',
           mysql: 'UPDATE `Users` SET `username`=$1 WHERE `username` = $2 LIMIT 1',
           sqlite: 'UPDATE `Users` SET `username`=$1 WHERE rowid IN (SELECT rowid FROM `Users` WHERE `username` = $2 LIMIT 1)',
-          db2: 'UPDATE (SELECT * FROM Users WHERE username = $2 FETCH FIRST 1 ROWS ONLY) SET username=$1',
+          db2: 'UPDATE (SELECT * FROM "Users" WHERE "username" = $2 FETCH FIRST 1 ROWS ONLY) SET "username"=$1',
           default: 'UPDATE [Users] SET [username]=$1 WHERE [username] = $2'
         },
         bind: {
