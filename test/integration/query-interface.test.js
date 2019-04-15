@@ -70,7 +70,7 @@ describe(Support.getTestDialectTeaser('QueryInterface'), () => {
       }).then(() => {
         return self.queryInterface.dropAllTables({skip: ['skipme']}).then(() => {
           return self.queryInterface.showAllTables().then(tableNames => {
-            if (dialect === 'mssql' /* current.dialect.supports.schemas */) {
+            if (dialect === 'mssql' || dialect === 'db2' /* current.dialect.supports.schemas */) {
               tableNames = _.map(tableNames, 'tableName');
             }
             expect(tableNames).to.contain('skipme');

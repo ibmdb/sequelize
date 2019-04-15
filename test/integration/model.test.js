@@ -2350,7 +2350,7 @@ describe(Support.getTestDialectTeaser('Model'), () => {
       const run = function() {
         return UserPub.sync({ force: true }).then(() => {
           return ItemPub.sync({ force: true, logging: _.after(2, _.once(sql => {
-            if (dialect === 'postgres') {
+            if (dialect === 'postgres' || dialect === 'db2') {
               expect(sql).to.match(/REFERENCES\s+"prefix"\."UserPubs" \("id"\)/);
             } else if (dialect === 'mssql') {
               expect(sql).to.match(/REFERENCES\s+\[prefix\]\.\[UserPubs\] \(\[id\]\)/);
@@ -2398,7 +2398,7 @@ describe(Support.getTestDialectTeaser('Model'), () => {
           return self.UserSpecialSync.schema('special').create({age: 3}, {
             logging(UserSpecial) {
               logged++;
-              if (dialect === 'postgres') {
+              if (dialect === 'postgres' || dialect === 'db2') {
                 expect(UserSpecial.indexOf('INSERT INTO "special"."UserSpecials"')).to.be.above(-1);
               } else if (dialect === 'sqlite') {
                 expect(UserSpecial.indexOf('INSERT INTO `special.UserSpecials`')).to.be.above(-1);
@@ -2455,7 +2455,7 @@ describe(Support.getTestDialectTeaser('Model'), () => {
 
       // The posts table gets dropped in the before filter.
       return Post.sync({logging: _.once(sql => {
-        if (dialect === 'postgres') {
+        if (dialect === 'postgres' || dialect === 'db2') {
           expect(sql).to.match(/"authorId" INTEGER REFERENCES "authors" \("id"\)/);
         } else if (dialect === 'mysql') {
           expect(sql).to.match(/FOREIGN KEY \(`authorId`\) REFERENCES `authors` \(`id`\)/);
@@ -2480,7 +2480,7 @@ describe(Support.getTestDialectTeaser('Model'), () => {
 
       // The posts table gets dropped in the before filter.
       return Post.sync({logging: _.once(sql => {
-        if (dialect === 'postgres') {
+        if (dialect === 'postgres' || dialect === 'db2') {
           expect(sql).to.match(/"authorId" INTEGER REFERENCES "authors" \("id"\)/);
         } else if (dialect === 'mysql') {
           expect(sql).to.match(/FOREIGN KEY \(`authorId`\) REFERENCES `authors` \(`id`\)/);
