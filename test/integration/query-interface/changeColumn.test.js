@@ -73,6 +73,8 @@ describe(Support.getTestDialectTeaser('QueryInterface'), () => {
       }).then(table => {
         if (dialect === 'postgres' || dialect === 'postgres-native') {
           expect(table.currency.type).to.equal('DOUBLE PRECISION');
+        } else if (dialect === 'db2') {
+          expect(table.currency.type).to.equal('DOUBLE');
         } else {
           expect(table.currency.type).to.equal('FLOAT');
         }

@@ -77,7 +77,7 @@ module.exports = {
     },
     pool: {
       max: process.env.SEQ_DB2_POOL_MAX  || process.env.SEQ_POOL_MAX  || 5,
-      idle: process.env.SEQ_DB2_POOL_IDLE || process.env.SEQ_POOL_IDLE || 3000
+      idle: process.env.SEQ_DB2_POOL_IDLE || process.env.SEQ_POOL_IDLE || 60000
     }
   }
 };

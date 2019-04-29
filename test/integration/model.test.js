@@ -1619,17 +1619,29 @@ describe(Support.getTestDialectTeaser('Model'), () => {
       }).then(tobi => {
         return tobi.destroy();
       }).then(() => {
-        return self.sequelize.query('SELECT * FROM paranoidusers WHERE username=\'Tobi\'', { plain: true});
+        if(dialect === 'db2') {
+          return self.sequelize.query('SELECT * FROM "paranoidusers" WHERE "username"=\'Tobi\'', { plain: true});
+        } else {
+          return self.sequelize.query('SELECT * FROM paranoidusers WHERE username=\'Tobi\'', { plain: true});
+        }
       }).then(result => {
         expect(result.username).to.equal('Tobi');
         return User.destroy({where: {username: 'Tony'}});
       }).then(() => {
-        return self.sequelize.query('SELECT * FROM paranoidusers WHERE username=\'Tony\'', { plain: true});
+        if(dialect === 'db2') {
+          return self.sequelize.query('SELECT * FROM "paranoidusers" WHERE "username"=\'Tony\'', { plain: true});
+        } else {
+          return self.sequelize.query('SELECT * FROM paranoidusers WHERE username=\'Tony\'', { plain: true});
+        }
       }).then(result => {
         expect(result.username).to.equal('Tony');
         return User.destroy({where: {username: ['Tony', 'Max']}, force: true});
       }).then(() => {
-        return self.sequelize.query('SELECT * FROM paranoidusers', {raw: true});
+        if(dialect === 'db2') {
+          return self.sequelize.query('SELECT * FROM "paranoidusers"', {raw: true});
+        } else {
+          return self.sequelize.query('SELECT * FROM paranoidusers', {raw: true});
+        }
       }).spread(users => {
         expect(users).to.have.length(1);
         expect(users[0].username).to.equal('Tobi');
@@ -2257,7 +2269,7 @@ describe(Support.getTestDialectTeaser('Model'), () => {
 
         // sqlite & MySQL doesn't actually create schemas unless Model.sync() is called
         // Postgres supports schemas natively
-        expect(schemas).to.have.length(dialect === 'postgres' || dialect === 'mssql' ? 2 : 1);
+        expect(schemas).to.have.length(dialect === 'postgres' || dialect === 'mssql' || dialect === 'db2' ? 2 : 1);
       });
     });
 
@@ -2301,7 +2313,7 @@ describe(Support.getTestDialectTeaser('Model'), () => {
         return UserPublic.schema('special').sync({ force: true }).then(() => {
           return self.sequelize.queryInterface.describeTable('Publics', {
             logging(sql) {
-              if (dialect === 'sqlite' || dialect === 'mysql' || dialect === 'mssql') {
+              if (dialect === 'sqlite' || dialect === 'mysql' || dialect === 'mssql' || dialect === 'db2') {
                 expect(sql).to.not.contain('special');
                 count++;
               }
@@ -2314,7 +2326,7 @@ describe(Support.getTestDialectTeaser('Model'), () => {
             return self.sequelize.queryInterface.describeTable('Publics', {
               schema: 'special',
               logging(sql) {
-                if (dialect === 'sqlite' || dialect === 'mysql' || dialect === 'mssql') {
+                if (dialect === 'sqlite' || dialect === 'mysql' || dialect === 'mssql' || dialect === 'db2') {
                   expect(sql).to.contain('special');
                   count++;
                 }
@@ -2380,7 +2392,7 @@ describe(Support.getTestDialectTeaser('Model'), () => {
         return UserPublicSync.create({age: 3}, {
           logging(UserPublic) {
             logged++;
-            if (dialect === 'postgres') {
+            if (dialect === 'postgres' || dialect === 'db2') {
               expect(self.UserSpecialSync.getTableName().toString()).to.equal('"special"."UserSpecials"');
               expect(UserPublic.indexOf('INSERT INTO "UserPublics"')).to.be.above(-1);
             } else if (dialect === 'sqlite') {
@@ -2412,7 +2424,7 @@ describe(Support.getTestDialectTeaser('Model'), () => {
             return UserSpecial.updateAttributes({age: 5}, {
               logging(user) {
                 logged++;
-                if (dialect === 'postgres') {
+                if (dialect === 'postgres' || dialect === 'db2') {
                   expect(user.indexOf('UPDATE "special"."UserSpecials"')).to.be.above(-1);
                 } else if (dialect === 'mssql') {
                   expect(user.indexOf('UPDATE [special].[UserSpecials]')).to.be.above(-1);
@@ -2455,10 +2467,12 @@ describe(Support.getTestDialectTeaser('Model'), () => {
 
       // The posts table gets dropped in the before filter.
       return Post.sync({logging: _.once(sql => {
-        if (dialect === 'postgres' || dialect === 'db2') {
+        if (dialect === 'postgres') {
           expect(sql).to.match(/"authorId" INTEGER REFERENCES "authors" \("id"\)/);
         } else if (dialect === 'mysql') {
           expect(sql).to.match(/FOREIGN KEY \(`authorId`\) REFERENCES `authors` \(`id`\)/);
+        } else if (dialect === 'db2') {
+          expect(sql).to.match(/FOREIGN KEY \("authorId"\) REFERENCES "authors" \("id"\)/);
         } else if (dialect === 'mssql') {
           expect(sql).to.match(/FOREIGN KEY \(\[authorId\]\) REFERENCES \[authors\] \(\[id\]\)/);
         } else if (dialect === 'sqlite') {
@@ -2480,10 +2494,12 @@ describe(Support.getTestDialectTeaser('Model'), () => {
 
       // The posts table gets dropped in the before filter.
       return Post.sync({logging: _.once(sql => {
-        if (dialect === 'postgres' || dialect === 'db2') {
+        if (dialect === 'postgres') {
           expect(sql).to.match(/"authorId" INTEGER REFERENCES "authors" \("id"\)/);
         } else if (dialect === 'mysql') {
           expect(sql).to.match(/FOREIGN KEY \(`authorId`\) REFERENCES `authors` \(`id`\)/);
+        } else if (dialect === 'db2') {
+          expect(sql).to.match(/FOREIGN KEY \("authorId"\) REFERENCES "authors" \("id"\)/);
         } else if (dialect === 'sqlite') {
           expect(sql).to.match(/`authorId` INTEGER REFERENCES `authors` \(`id`\)/);
         } else if (dialect === 'mssql') {
@@ -2504,7 +2520,7 @@ describe(Support.getTestDialectTeaser('Model'), () => {
 
       // The posts table gets dropped in the before filter.
       return Post.sync().then(() => {
-        if (dialect === 'sqlite') {
+        if (dialect === 'sqlite' || dialect === 'db2') {
           // sorry ... but sqlite is too stupid to understand whats going on ...
           expect(1).to.equal(1);
         } else {

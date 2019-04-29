@@ -18,7 +18,7 @@ const chai = require('chai'),
 
 
 const qq = function(str) {
-  if (dialect === 'postgres' || dialect === 'mssql') {
+  if (dialect === 'postgres' || dialect === 'mssql' || dialect === 'db2') {
     return '"' + str + '"';
   } else if (dialect === 'mysql' || dialect === 'sqlite') {
     return '`' + str + '`';
@@ -419,6 +419,21 @@ describe(Support.getTestDialectTeaser('Sequelize'), () => {
           });
         });
       });
+    } else if (dialect === 'db2') {
+      it('executes stored procedures', function() {
+        const self = this;
+        return self.sequelize.query(this.insertQuery).then(() => {
+          return self.sequelize.query('DROP PROCEDURE foo').then(() => {
+            return self.sequelize.query(
+              'CREATE PROCEDURE foo() DYNAMIC RESULT SETS 1 LANGUAGE SQL BEGIN DECLARE cr1 CURSOR WITH RETURN FOR SELECT * FROM ' + self.User.tableName + '; OPEN cr1; END'
+            ).then(() => {
+              return self.sequelize.query('CALL foo()').then(users => {
+                expect(users.map(u => { return u.username; })).to.include('john');
+              });
+            });
+          });
+        });
+      });
     } else {
       console.log('FIXME: I want to be supported in this dialect as well :-(');
     }
@@ -563,14 +578,14 @@ describe(Support.getTestDialectTeaser('Sequelize'), () => {
     });
 
     it('dot separated attributes when doing a raw query without nest', function() {
-      const tickChar = dialect === 'postgres' || dialect === 'mssql' ? '"' : '`',
+      const tickChar = dialect === 'postgres' || dialect === 'mssql' || dialect === 'db2' ? '"' : '`',
         sql = 'select 1 as ' + Sequelize.Utils.addTicks('foo.bar.baz', tickChar);
 
       return expect(this.sequelize.query(sql, { raw: true, nest: false }).get(0)).to.eventually.deep.equal([{ 'foo.bar.baz': 1 }]);
     });
 
     it('destructs dot separated attributes when doing a raw query using nest', function() {
-      const tickChar = dialect === 'postgres' || dialect === 'mssql' ? '"' : '`',
+      const tickChar = dialect === 'postgres' || dialect === 'mssql' || dialect === 'db2' ? '"' : '`',
         sql = 'select 1 as ' + Sequelize.Utils.addTicks('foo.bar.baz', tickChar);
 
       return this.sequelize.query(sql, { raw: true, nest: true }).then(result => {
