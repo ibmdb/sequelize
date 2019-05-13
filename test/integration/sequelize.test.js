@@ -248,7 +248,7 @@ describe(Support.getTestDialectTeaser('Sequelize'), () => {
         }
       });
 
-      this.insertQuery = 'INSERT INTO ' + qq(this.User.tableName) + ' (username, email_address, ' +
+      this.insertQuery = 'INSERT INTO ' + qq(this.User.tableName) + (dialect === 'db2') ? ' ("username", "email_address", ' : ' (username, email_address, ' +
         qq('createdAt') + ', ' + qq('updatedAt') +
         ") VALUES ('john', 'john@gmail.com', '2012-01-01 10:10:10', '2012-01-01 10:10:10')";
 
@@ -264,7 +264,7 @@ describe(Support.getTestDialectTeaser('Sequelize'), () => {
     });
 
     it('executes a query if a placeholder value is an array', function() {
-      return this.sequelize.query(`INSERT INTO ${qq(this.User.tableName)} (username, email_address, ` +
+      return this.sequelize.query(`INSERT INTO ${qq(this.User.tableName)} (${qq('username')}, ${qq('email_address')}, ` +
         `${qq('createdAt')}, ${qq('updatedAt')}) VALUES ?;`, {
         replacements: [[
           ['john', 'john@gmail.com', '2012-01-01 10:10:10', '2012-01-01 10:10:10'],
@@ -543,7 +543,11 @@ describe(Support.getTestDialectTeaser('Sequelize'), () => {
           this.values = [1, 2];
         }
         get query() {
-          return 'select ? as foo, ? as bar';
+          if (dialect === 'db2') {
+            return 'select ? as "foo", ? as "bar"';
+          } else {
+            return 'select ? as foo, ? as bar';
+          }
         }
       }
       return this.sequelize.query(new SQLStatement(), { type: this.sequelize.QueryTypes.SELECT, logging: s => logSql = s } ).then(result => {
@@ -564,14 +568,18 @@ describe(Support.getTestDialectTeaser('Sequelize'), () => {
       const typeCast = dialect === 'postgres' ? '::int' : '';
       let logSql;
       return this.sequelize.query({ query: 'select $1'+typeCast+' as foo, $2'+typeCast+' as bar', bind: [1, 2] }, { type: this.sequelize.QueryTypes.SELECT, logging(s) { logSql = s; } }).then(result => {
-        expect(result).to.deep.equal([{ foo: 1, bar: 2 }]);
+        if (dialect === 'db2') {
+          expect(result).to.deep.equal([{ FOO: 1, BAR: 2 }]);
+        } else {
+          expect(result).to.deep.equal([{ foo: 1, bar: 2 }]);
+        }
         if (dialect === 'postgres' || dialect === 'sqlite') {
           expect(logSql.indexOf('$1')).to.be.above(-1);
           expect(logSql.indexOf('$2')).to.be.above(-1);
         } else if (dialect === 'mssql') {
           expect(logSql.indexOf('@0')).to.be.above(-1);
           expect(logSql.indexOf('@1')).to.be.above(-1);
-        } else if (dialect === 'mysql') {
+        } else if (dialect === 'mysql' || dialect === 'db2') {
           expect(logSql.match(/\?/g).length).to.equal(2);
         }
       });

@@ -191,7 +191,7 @@ describe(Support.getTestDialectTeaser('Model'), () => {
       });
     });
 
-    if (['sqlite', 'mssql'].indexOf(current.dialect.name) === -1) {
+    if (['sqlite', 'mssql', 'db2'].indexOf(current.dialect.name) === -1) {
       it('should not deadlock with no existing entries and no outer transaction', function() {
         const User = this.sequelize.define('User', {
           email: {
@@ -454,7 +454,7 @@ describe(Support.getTestDialectTeaser('Model'), () => {
         });
       }
 
-      (dialect !== 'sqlite' && dialect !== 'mssql' ? it : it.skip)('should not fail silently with concurrency higher than pool, a unique constraint and a create hook resulting in mismatched values', function() {
+      (dialect !== 'sqlite' && dialect !== 'mssql' && dialect !== 'db2' ? it : it.skip)('should not fail silently with concurrency higher than pool, a unique constraint and a create hook resulting in mismatched values', function() {
         const User = this.sequelize.define('user', {
           username: {
             type: DataTypes.STRING,
@@ -1139,9 +1139,9 @@ describe(Support.getTestDialectTeaser('Model'), () => {
 
     it('should only store the values passed in the whitelist', function() {
       const self = this,
-        data = { username: 'Peter', secretValue: '42' };
+        data = { username: 'Peter', secretValue: '42', uniqueName: 'name' };
 
-      return this.User.create(data, { fields: ['username'] }).then(user => {
+      return this.User.create(data, { fields: ['username', 'uniqueName'] }).then(user => {
         return self.User.findById(user.id).then(_user => {
           expect(_user.username).to.equal(data.username);
           expect(_user.secretValue).not.to.equal(data.secretValue);

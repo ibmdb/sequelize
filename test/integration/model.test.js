@@ -419,6 +419,14 @@ describe(Support.getTestDialectTeaser('Model'), () => {
             { attribute: 'fieldB', length: undefined, order: 'ASC', collate: undefined},
             { attribute: 'fieldA', length: undefined, order: 'DESC', collate: undefined}
           ]);
+        } else if (dialect === 'db2') {
+          idx1 = arguments[2];
+          idx2 = arguments[1];
+
+          expect(idx1.fields).to.deep.equal([
+            { attribute: 'fieldB', length: undefined, order: 'ASC', collate: undefined},
+            { attribute: 'fieldA', length: undefined, order: 'DESC', collate: undefined}
+          ]);
         } else if (dialect === 'postgres') {
           // Postgres returns indexes in alphabetical order
           primary = arguments[2];
@@ -2520,7 +2528,7 @@ describe(Support.getTestDialectTeaser('Model'), () => {
 
       // The posts table gets dropped in the before filter.
       return Post.sync().then(() => {
-        if (dialect === 'sqlite' || dialect === 'db2') {
+        if (dialect === 'sqlite') {
           // sorry ... but sqlite is too stupid to understand whats going on ...
           expect(1).to.equal(1);
         } else {
@@ -2544,6 +2552,8 @@ describe(Support.getTestDialectTeaser('Model'), () => {
           expect(err.message).to.match(/relation "4uth0r5" does not exist/);
         } else if (dialect === 'mssql') {
           expect(err.message).to.match(/Could not create constraint/);
+        } else if (dialect === 'db2') {
+          expect(err.message).to.match(/ is an undefined name/);
         } else {
           throw new Error('Undefined dialect!');
         }
