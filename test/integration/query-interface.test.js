@@ -28,7 +28,7 @@ describe(Support.getTestDialectTeaser('QueryInterface'), () => {
         .then(() => this.queryInterface.renameTable('myTestTable', 'myTestTableNew'))
         .then(() => this.queryInterface.showAllTables())
         .then(tableNames => {
-          if (dialect === 'mssql') {
+          if (dialect === 'mssql' || dialect === 'db2') {
             tableNames = _.map(tableNames, 'tableName');
           }
           expect(tableNames).to.contain('myTestTableNew');
@@ -175,6 +175,9 @@ describe(Support.getTestDialectTeaser('QueryInterface'), () => {
             case 'mssql':
               assertVal = 'NVARCHAR';
               break;
+            case 'db2':
+              assertVal = 'VARCHAR';
+              break;
           }
           expect(username.type).to.equal(assertVal);
           expect(username.allowNull).to.be.true;
@@ -200,6 +203,9 @@ describe(Support.getTestDialectTeaser('QueryInterface'), () => {
               break;
             case 'mssql':
               assertVal = 'BIT';
+              break;
+            case 'db2':
+              assertVal = 'BOOLEAN';
               break;
           }
           expect(isAdmin.type).to.equal(assertVal);
@@ -446,6 +452,8 @@ describe(Support.getTestDialectTeaser('QueryInterface'), () => {
       });
     });
 
+    // Db2 does not support enums in alter column
+    if (dialect !== 'db2') {
     it('should work with enums (1)', function() {
       return this.queryInterface.addColumn('users', 'someEnum', DataTypes.ENUM('value1', 'value2', 'value3'));
     });
@@ -456,6 +464,7 @@ describe(Support.getTestDialectTeaser('QueryInterface'), () => {
         values: ['value1', 'value2', 'value3']
       });
     });
+    }
   });
 
   describe('describeForeignKeys', () => {
@@ -502,7 +511,12 @@ describe(Support.getTestDialectTeaser('QueryInterface'), () => {
     });
 
     it('should get a list of foreign keys for the table', function() {
-      const sql = this.queryInterface.QueryGenerator.getForeignKeysQuery('hosts', this.sequelize.config.database);
+      let sql = "";
+      if (dialect === 'db2') {
+        sql = this.queryInterface.QueryGenerator.getForeignKeysQuery('hosts', this.sequelize.config.username.toUpperCase());
+      } else {
+        sql = this.queryInterface.QueryGenerator.getForeignKeysQuery('hosts', this.sequelize.config.database);
+      }
       const self = this;
       return this.sequelize.query(sql, {type: this.sequelize.QueryTypes.FOREIGNKEYS}).then(fks => {
         expect(fks).to.have.length(3);
@@ -514,7 +528,7 @@ describe(Support.getTestDialectTeaser('QueryInterface'), () => {
           expect(keys).to.have.length(6);
           expect(keys2).to.have.length(7);
           expect(keys3).to.have.length(7);
-        } else if (dialect === 'sqlite') {
+        } else if (dialect === 'sqlite' || dialect === 'db2') {
           expect(keys).to.have.length(8);
         } else if (dialect === 'mysql' || dialect === 'mssql') {
           expect(keys).to.have.length(12);
@@ -556,7 +570,7 @@ describe(Support.getTestDialectTeaser('QueryInterface'), () => {
     beforeEach(function() {
       this.User = this.sequelize.define('users', {
         username: DataTypes.STRING,
-        email: DataTypes.STRING,
+        email: {type: DataTypes.STRING, allowNull: false},
         roles: DataTypes.STRING
       });
 

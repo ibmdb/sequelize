@@ -44,6 +44,8 @@ describe(Support.getTestDialectTeaser('QueryInterface'), () => {
         }).then(table => {
           if (dialect === 'postgres' || dialect === 'postgres-native') {
             expect(table.currency.type).to.equal('DOUBLE PRECISION');
+          } else if (dialect === 'db2') {
+            expect(table.currency.type).to.equal('DOUBLE');
           } else {
             expect(table.currency.type).to.equal('FLOAT');
           }
@@ -83,7 +85,7 @@ describe(Support.getTestDialectTeaser('QueryInterface'), () => {
 
     // MSSQL doesn't support using a modified column in a check constraint.
     // https://docs.microsoft.com/en-us/sql/t-sql/statements/alter-table-transact-sql
-    if (dialect !== 'mssql') {
+    if (dialect !== 'mssql' && dialect !== 'db2') {
       it('should work with enums', function() {
         return this.queryInterface.createTable({
           tableName: 'users'

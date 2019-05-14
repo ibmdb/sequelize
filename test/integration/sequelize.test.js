@@ -142,6 +142,7 @@ describe(Support.getTestDialectTeaser('Sequelize'), () => {
                 err.message.match(/invalid port number/) ||
                 err.message.match(/should be >=? 0 and < 65536/) ||
                 err.message.match(/Login failed for user/) ||
+                err.message.match(/SQL30081N/) ||
                 err.message.match(/Port must be > 0 and < 65536/)
               ).to.be.ok;
             });
@@ -248,7 +249,7 @@ describe(Support.getTestDialectTeaser('Sequelize'), () => {
         }
       });
 
-      this.insertQuery = 'INSERT INTO ' + qq(this.User.tableName) + (dialect === 'db2') ? ' ("username", "email_address", ' : ' (username, email_address, ' +
+      this.insertQuery = 'INSERT INTO ' + qq(this.User.tableName) + ((dialect === 'db2') ? ' ("username", "email_address", ' : ' (username, email_address, ') +
         qq('createdAt') + ', ' + qq('updatedAt') +
         ") VALUES ('john', 'john@gmail.com', '2012-01-01 10:10:10', '2012-01-01 10:10:10')";
 
