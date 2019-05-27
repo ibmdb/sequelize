@@ -37,7 +37,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
             postgres: 'TRUNCATE "public"."test_users" CASCADE',
             mssql: 'TRUNCATE TABLE [public].[test_users]',
             mysql: 'TRUNCATE `public.test_users`',
-            db2: 'TRUNCATE TABLE "public"."test_users"',
+            db2: 'TRUNCATE TABLE "public"."test_users" IMMEDIATE',
             sqlite: 'DELETE FROM `public.test_users`'
           }
         );
@@ -64,7 +64,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
             postgres: 'TRUNCATE "public"."test_users" RESTART IDENTITY CASCADE',
             mssql: 'TRUNCATE TABLE [public].[test_users]',
             mysql: 'TRUNCATE `public.test_users`',
-            db2: 'TRUNCATE TABLE "public"."test_users"',
+            db2: 'TRUNCATE TABLE "public"."test_users" IMMEDIATE',
             sqlite: 'DELETE FROM `public.test_users`'
           }
         );
@@ -116,7 +116,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
             postgres: 'DELETE FROM "public"."test_users" WHERE "id" IN (SELECT "id" FROM "public"."test_users" WHERE "name" = \'foo\'\';DROP TABLE mySchema.myTable;\' LIMIT 10)',
             sqlite: "DELETE FROM `public.test_users` WHERE rowid IN (SELECT rowid FROM `public.test_users` WHERE `name` = \'foo\'\';DROP TABLE mySchema.myTable;\' LIMIT 10)",
             mssql: "DELETE TOP(10) FROM [public].[test_users] WHERE [name] = N'foo'';DROP TABLE mySchema.myTable;'; SELECT @@ROWCOUNT AS AFFECTEDROWS;",
-            db2: "DELETE FROM \"public\".\"test_users\" WHERE \"name\" = 'foo\\';DROP TABLE mySchema.myTable;' FETCH FIRST 10 ROWS ONLY",
+            db2: "DELETE FROM \"public\".\"test_users\" WHERE \"name\" = 'foo'';DROP TABLE mySchema.myTable;' FETCH NEXT 10 ROWS ONLY",
             default: "DELETE FROM [public.test_users] WHERE `name` = 'foo\\';DROP TABLE mySchema.myTable;' LIMIT 10"
           }
         );
@@ -149,7 +149,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
             postgres: new Error('Cannot LIMIT delete without a model.'),
             sqlite: "DELETE FROM `public.test_users` WHERE rowid IN (SELECT rowid FROM `public.test_users` WHERE `name` = 'foo'';DROP TABLE mySchema.myTable;' LIMIT 10)",
             mssql: "DELETE TOP(10) FROM [public].[test_users] WHERE [name] = N'foo'';DROP TABLE mySchema.myTable;'; SELECT @@ROWCOUNT AS AFFECTEDROWS;",
-            db2: "DELETE FROM \"public\".\"test_users\" WHERE \"name\" = 'foo\\';DROP TABLE mySchema.myTable;' FETCH FIRST 10 ROWS ONLY",
+            db2: "DELETE FROM \"public\".\"test_users\" WHERE \"name\" = 'foo'';DROP TABLE mySchema.myTable;' FETCH NEXT 10 ROWS ONLY",
             default: "DELETE FROM [public.test_users] WHERE `name` = 'foo\\';DROP TABLE mySchema.myTable;' LIMIT 10"
           }
         );

@@ -187,7 +187,7 @@ if (dialect === 'db2') {
           context: QueryGenerator
         }, {
           arguments: ['myTable', {where: {name: "foo';DROP TABLE myTable;"}}],
-          expectation: "SELECT * FROM \"myTable\" WHERE \"myTable\".\"name\" = 'foo\\';DROP TABLE myTable;';",
+          expectation: "SELECT * FROM \"myTable\" WHERE \"myTable\".\"name\" = 'foo'';DROP TABLE myTable;';",
           context: QueryGenerator
         }, {
           arguments: ['myTable', {where: 2}],
@@ -332,16 +332,16 @@ expectation: "SELECT * FROM \"myTable\" ORDER BY f1(\"myTable\".\"id\") DESC, f2
           needsSequelize: true
         }, {
           arguments: ['myTable', {limit: 10}],
-          expectation: 'SELECT * FROM "myTable" FETCH FIRST 10 ROWS ONLY;',
+          expectation: 'SELECT * FROM "myTable" FETCH NEXT 10 ROWS ONLY;',
           context: QueryGenerator
         }, {
           arguments: ['myTable', {limit: 10, offset: 2}],
-          expectation: 'SELECT * FROM "myTable" FETCH FIRST 10 ROWS ONLY;',
+          expectation: 'SELECT * FROM "myTable" OFFSET 2 ROWS FETCH NEXT 10 ROWS ONLY;',
           context: QueryGenerator
         }, {
-          title: 'ignore it if only offset is specified',
+          title: 'if only offset is specified',
           arguments: ['myTable', {offset: 2}],
-          expectation: 'SELECT * FROM "myTable";',
+          expectation: 'SELECT * FROM "myTable" OFFSET 2 ROWS;',
           context: QueryGenerator
         }, {
           title: 'ignore limit 0',
@@ -371,7 +371,7 @@ expectation: "SELECT * FROM \"myTable\" ORDER BY f1(\"myTable\".\"id\") DESC, f2
         }, {
           title: 'buffer as where argument',
           arguments: ['myTable', {where: { field: new Buffer('Sequelize')}}],
-          expectation: 'SELECT * FROM "myTable" WHERE "myTable"."field" = 0x53657175656c697a65;',
+          expectation: 'SELECT * FROM "myTable" WHERE "myTable"."field" = BLOB(\'Sequelize\');',
           context: QueryGenerator
         }, {
           title: 'use != if ne !== null',
@@ -508,7 +508,7 @@ expectation: "SELECT * FROM \"myTable\" ORDER BY f1(\"myTable\".\"id\") DESC, f2
           expectation: "INSERT INTO \"myTable\" (\"name\") VALUES ('foo'),('bar');"
         }, {
           arguments: ['myTable', [{name: "foo';DROP TABLE myTable;"}, {name: 'bar'}]],
-          expectation: "INSERT INTO \"myTable\" (\"name\") VALUES ('foo\\';DROP TABLE myTable;'),('bar');"
+          expectation: "INSERT INTO \"myTable\" (\"name\") VALUES ('foo'';DROP TABLE myTable;'),('bar');"
         }, {
           arguments: ['myTable', [{name: 'foo', birthday: new Date(Date.UTC(2011, 2, 27, 10, 1, 55))}, {name: 'bar', birthday: new Date(Date.UTC(2012, 2, 27, 10, 1, 55))}]],
           expectation: "INSERT INTO \"myTable\" (\"name\",\"birthday\") VALUES ('foo','2011-03-27 10:01:55'),('bar','2012-03-27 10:01:55');"
@@ -543,58 +543,58 @@ expectation: "SELECT * FROM \"myTable\" ORDER BY f1(\"myTable\".\"id\") DESC, f2
         {
           arguments: ['myTable', {name: 'foo', birthday: new Date(Date.UTC(2011, 2, 27, 10, 1, 55))}, {id: 2}],
           expectation: {
-            query: 'UPDATE "myTable" SET "name"=$1,"birthday"=$2 WHERE "id" = $3',
+            query: 'SELECT * FROM FINAL TABLE (UPDATE "myTable" SET "name"=$1,"birthday"=$2 WHERE "id" = $3)',
             bind: ['foo', new Date(Date.UTC(2011, 2, 27, 10, 1, 55)), 2]
           }
 
         }, {
           arguments: ['myTable', {name: 'foo', birthday: new Date(Date.UTC(2011, 2, 27, 10, 1, 55))}, {id: 2}],
           expectation: {
-            query: 'UPDATE "myTable" SET "name"=$1,"birthday"=$2 WHERE "id" = $3',
+            query: 'SELECT * FROM FINAL TABLE (UPDATE "myTable" SET "name"=$1,"birthday"=$2 WHERE "id" = $3)',
             bind: ['foo', new Date(Date.UTC(2011, 2, 27, 10, 1, 55)), 2]
           }
         }, {
           arguments: ['myTable', {bar: 2}, {name: 'foo'}],
           expectation: {
-            query: 'UPDATE "myTable" SET "bar"=$1 WHERE "name" = $2',
+            query: 'SELECT * FROM FINAL TABLE (UPDATE "myTable" SET "bar"=$1 WHERE "name" = $2)',
             bind: [2, 'foo']
           }
         }, {
           arguments: ['myTable', {name: "foo';DROP TABLE myTable;"}, {name: 'foo'}],
           expectation: {
-            query: 'UPDATE "myTable" SET "name"=$1 WHERE "name" = $2',
+            query: 'SELECT * FROM FINAL TABLE (UPDATE "myTable" SET "name"=$1 WHERE "name" = $2)',
             bind: ["foo';DROP TABLE myTable;", 'foo']
           }
         }, {
           arguments: ['myTable', {bar: 2, nullValue: null}, {name: 'foo'}],
           expectation: {
-            query: 'UPDATE "myTable" SET "bar"=$1,"nullValue"=$2 WHERE "name" = $3',
+            query: 'SELECT * FROM FINAL TABLE (UPDATE "myTable" SET "bar"=$1,"nullValue"=$2 WHERE "name" = $3)',
             bind: [2, null, 'foo']
           }
         }, {
           arguments: ['myTable', {bar: 2, nullValue: null}, {name: 'foo'}],
           expectation: {
-            query: 'UPDATE "myTable" SET "bar"=$1,"nullValue"=$2 WHERE "name" = $3',
+            query: 'SELECT * FROM FINAL TABLE (UPDATE "myTable" SET "bar"=$1,"nullValue"=$2 WHERE "name" = $3)',
             bind: [2, null, 'foo']
           },
           context: {options: {omitNull: false}}
         }, {
           arguments: ['myTable', {bar: 2, nullValue: null}, {name: 'foo'}],
           expectation: {
-            query: 'UPDATE "myTable" SET "bar"=$1 WHERE "name" = $2',
+            query: 'SELECT * FROM FINAL TABLE (UPDATE "myTable" SET "bar"=$1 WHERE "name" = $2)',
             bind: [2, 'foo']
           },
           context: {options: {omitNull: true}}
         }, {
           arguments: ['myTable', {bar: false}, {name: 'foo'}],
           expectation: {
-            query: 'UPDATE "myTable" SET "bar"=$1 WHERE "name" = $2',
+            query: 'SELECT * FROM FINAL TABLE (UPDATE "myTable" SET "bar"=$1 WHERE "name" = $2)',
             bind: [false, 'foo']
           }
         }, {
           arguments: ['myTable', {bar: true}, {name: 'foo'}],
           expectation: {
-            query: 'UPDATE "myTable" SET "bar"=$1 WHERE "name" = $2',
+            query: 'SELECT * FROM FINAL TABLE (UPDATE "myTable" SET "bar"=$1 WHERE "name" = $2)',
             bind: [true, 'foo']
           }
         }, {
@@ -604,7 +604,7 @@ expectation: "SELECT * FROM \"myTable\" ORDER BY f1(\"myTable\".\"id\") DESC, f2
             };
           }, {name: 'foo'}],
           expectation: {
-            query: 'UPDATE "myTable" SET "bar"=NOW() WHERE "name" = $1',
+            query: 'SELECT * FROM FINAL TABLE (UPDATE "myTable" SET "bar"=NOW() WHERE "name" = $1)',
             bind: ['foo']
           },
           needsSequelize: true
@@ -615,7 +615,7 @@ expectation: "SELECT * FROM \"myTable\" ORDER BY f1(\"myTable\".\"id\") DESC, f2
             };
           }, {name: 'foo'}],
           expectation: {
-            query: 'UPDATE "myTable" SET "bar"="foo" WHERE "name" = $1',
+            query: 'SELECT * FROM FINAL TABLE (UPDATE "myTable" SET "bar"="foo" WHERE "name" = $1)',
             bind: ['foo']
           },
           needsSequelize: true
@@ -625,10 +625,10 @@ expectation: "SELECT * FROM \"myTable\" ORDER BY f1(\"myTable\".\"id\") DESC, f2
       showIndexesQuery: [
         {
           arguments: ['User'],
-          expectation: "SELECT * FROM SYSIBM.SYSINDEXES WHERE TBNAME = 'User';"
+          expectation: 'SELECT NAME AS "name", TBNAME AS "tableName", UNIQUERULE AS "keyType", COLNAMES, INDEXTYPE AS "type" FROM SYSIBM.SYSINDEXES WHERE TBNAME = \'User\' ORDER BY NAME;'
         }, {
           arguments: ['User', { database: 'sequelize' }],
-          expectation: "SELECT * FROM SYSIBM.SYSINDEXES WHERE TBNAME = 'User';" 
+          expectation: 'SELECT NAME AS "name", TBNAME AS "tableName", UNIQUERULE AS "keyType", COLNAMES, INDEXTYPE AS "type" FROM SYSIBM.SYSINDEXES WHERE TBNAME = \'User\' ORDER BY NAME;'
         }
       ],
 
@@ -644,7 +644,7 @@ expectation: "SELECT * FROM \"myTable\" ORDER BY f1(\"myTable\".\"id\") DESC, f2
       getForeignKeyQuery: [
         {
           arguments: ['User', 'email'],
-          expectation: "SELECT R.CONSTNAME AS constraint_name, R.CONSTNAME AS constraintName, R.TABSCHEMA AS constraintSchema, R.TABNAME AS tableName, R.TABSCHEMA AS tableSchema, LISTAGG(C.COLNAME,', ') WITHIN GROUP (ORDER BY C.COLNAME) AS columnName, R.REFTABSCHEMA AS referencedTableSchema, R.REFTABNAME AS referencedTableName, R.FK_COLNAMES AS referencedColumnName FROM SYSCAT.REFERENCES R, SYSCAT.KEYCOLUSE C WHERE R.CONSTNAME = C.CONSTNAME AND R.TABSCHEMA = C.TABSCHEMA AND R.TABNAME = C.TABNAME AND R.TABNAME = 'User' AND C.COLNAME = 'email' GROUP BY R.REFTABSCHEMA, R.REFTABNAME, R.TABSCHEMA, R.TABNAME, R.CONSTNAME, R.FK_COLNAMES"
+          expectation: 'SELECT R.CONSTNAME AS "constraintName", TRIM(R.TABSCHEMA) AS "constraintSchema", R.TABNAME AS "tableName", TRIM(R.TABSCHEMA) AS "tableSchema", LISTAGG(C.COLNAME,\', \') WITHIN GROUP (ORDER BY C.COLNAME) AS "columnName", TRIM(R.REFTABSCHEMA) AS "referencedTableSchema", R.REFTABNAME AS "referencedTableName", TRIM(R.PK_COLNAMES) AS "referencedColumnName" FROM SYSCAT.REFERENCES R, SYSCAT.KEYCOLUSE C WHERE R.CONSTNAME = C.CONSTNAME AND R.TABSCHEMA = C.TABSCHEMA AND R.TABNAME = C.TABNAME AND R.TABNAME = \'User\' AND C.COLNAME = \'email\' GROUP BY R.REFTABSCHEMA, R.REFTABNAME, R.TABSCHEMA, R.TABNAME, R.CONSTNAME, R.PK_COLNAMES'
         }
       ]
     };

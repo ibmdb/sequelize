@@ -353,26 +353,28 @@ describe(Support.getTestDialectTeaser('QueryInterface'), () => {
       });
     });
 
-    it('renames a column primary key autoIncrement column', function() {
-      const self = this;
-      const Fruits = self.sequelize.define('Fruit', {
-        fruitId: {
-          type: DataTypes.INTEGER,
-          allowNull: false,
-          primaryKey: true,
-          autoIncrement: true
-        }
-      }, { freezeTableName: true });
+    if (dialect !== 'db2') { // Db2 does not allow rename of a primary key col
+      it('renames a column primary key autoIncrement column', function() {
+        const self = this;
+        const Fruits = self.sequelize.define('Fruit', {
+          fruitId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            primaryKey: true,
+            autoIncrement: true
+          }
+        }, { freezeTableName: true });
 
-      return Fruits.sync({ force: true }).then(() => {
-        return self.queryInterface.renameColumn('Fruit', 'fruitId', 'fruit_id');
-      }).bind(this).then(function() {
-        return this.queryInterface.describeTable('Fruit');
-      }).then(table => {
-        expect(table).to.have.property('fruit_id');
-        expect(table).to.not.have.property('fruitId');
+        return Fruits.sync({ force: true }).then(() => {
+          return self.queryInterface.renameColumn('Fruit', 'fruitId', 'fruit_id');
+        }).bind(this).then(function() {
+          return this.queryInterface.describeTable('Fruit');
+        }).then(table => {
+          expect(table).to.have.property('fruit_id');
+          expect(table).to.not.have.property('fruitId');
+        });
       });
-    });
+    }
 
     it('shows a reasonable error message when column is missing', function() {
       const self = this;

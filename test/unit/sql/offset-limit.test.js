@@ -29,7 +29,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
       model: {primaryKeyField: 'id', name: 'tableRef'}
     }, {
       default: ' LIMIT 10',
-      db2: ' FETCH FIRST 10 ROWS ONLY',
+      db2: ' FETCH NEXT 10 ROWS ONLY',
       mssql: ' ORDER BY [tableRef].[id] OFFSET 0 ROWS FETCH NEXT 10 ROWS ONLY'
     });
 
@@ -40,7 +40,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
       ]
     }, {
       default: ' LIMIT 10',
-      db2: ' FETCH FIRST 10 ROWS ONLY',
+      db2: ' FETCH NEXT 10 ROWS ONLY',
       mssql: ' OFFSET 0 ROWS FETCH NEXT 10 ROWS ONLY'
     });
 
@@ -53,7 +53,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
     }, {
       default: ' LIMIT 20, 10',
       postgres: ' LIMIT 10 OFFSET 20',
-      db2: ' FETCH FIRST 10 ROWS ONLY',
+      db2: ' OFFSET 20 ROWS FETCH NEXT 10 ROWS ONLY',
       mssql: ' OFFSET 20 ROWS FETCH NEXT 10 ROWS ONLY'
     });
 
@@ -65,7 +65,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
     }, {
       default: " LIMIT ''';DELETE FROM user'",
       mysql: " LIMIT '\\';DELETE FROM user'",
-      db2: " FETCH FIRST '\\';DELETE FROM user' ROWS ONLY",
+      db2: " FETCH NEXT ''';DELETE FROM user' ROWS ONLY",
       mssql: " OFFSET 0 ROWS FETCH NEXT N''';DELETE FROM user' ROWS ONLY"
     });
 
@@ -79,7 +79,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
       sqlite: " LIMIT ''';DELETE FROM user', 10",
       postgres: " LIMIT 10 OFFSET ''';DELETE FROM user'",
       mysql: " LIMIT '\\';DELETE FROM user', 10",
-      db2: " FETCH FIRST 10 ROWS ONLY",
+      db2: " FETCH NEXT 10 ROWS ONLY",
       mssql: " OFFSET N''';DELETE FROM user' ROWS FETCH NEXT 10 ROWS ONLY"
     });
   });

@@ -64,10 +64,16 @@ describe(Support.getTestDialectTeaser('QueryInterface'), () => {
         },
         currency: DataTypes.INTEGER
       }).then(() => {
-        return this.queryInterface.changeColumn('users', 'currency', {
-          type: DataTypes.FLOAT,
-          allowNull: true
-        });
+        if (dialect === 'db2') { // DB2 can change only one attr of a column
+          return this.queryInterface.changeColumn('users', 'currency', {
+            type: DataTypes.FLOAT
+          });
+        } else {
+          return this.queryInterface.changeColumn('users', 'currency', {
+            type: DataTypes.FLOAT,
+            allowNull: true
+          });
+        }
       }).then(() => {
         return this.queryInterface.describeTable({
           tableName: 'users'

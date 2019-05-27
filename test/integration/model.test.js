@@ -369,7 +369,7 @@ describe(Support.getTestDialectTeaser('Model'), () => {
         fields: ['fieldB', {attribute: 'fieldA', collate: dialect === 'sqlite' ? 'RTRIM' : 'en_US', order: 'DESC', length: 5}]
       }];
 
-      if (dialect !== 'mssql') {
+      if (dialect !== 'mssql' && dialect !== 'db2') {
         indices.push({
           type: 'FULLTEXT',
           fields: ['fieldC'],
@@ -420,8 +420,7 @@ describe(Support.getTestDialectTeaser('Model'), () => {
             { attribute: 'fieldA', length: undefined, order: 'DESC', collate: undefined}
           ]);
         } else if (dialect === 'db2') {
-          idx1 = arguments[2];
-          idx2 = arguments[1];
+          idx1 = arguments[1];
 
           expect(idx1.fields).to.deep.equal([
             { attribute: 'fieldB', length: undefined, order: 'ASC', collate: undefined},
@@ -470,7 +469,7 @@ describe(Support.getTestDialectTeaser('Model'), () => {
         expect(idx1.name).to.equal('a_b_uniq');
         expect(idx1.unique).to.be.ok;
 
-        if (dialect !== 'mssql') {
+        if (dialect !== 'mssql' && dialect !== 'db2') {
           expect(idx2.name).to.equal('models_field_c');
           expect(idx2.unique).not.to.be.ok;
         }

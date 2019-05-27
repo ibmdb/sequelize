@@ -92,6 +92,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
     }, {
       default: "WHERE [name] = 'here is a null char: \\0'",
       mssql: "WHERE [name] = N'here is a null char: \0'",
+      db2: "WHERE \"name\" = 'here is a null char: \0'",
       sqlite: "WHERE `name` = 'here is a null char: \0'"
     });
   });
@@ -152,7 +153,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
         postgres: '"field" = E\'\\\\x53657175656c697a65\'',
         sqlite: "`field` = X'53657175656c697a65'",
         mysql: "`field` = X'53657175656c697a65'",
-        db2: '"field" = 0x53657175656c697a65',
+        db2: '"field" = BLOB(\'Sequelize\')',
         mssql: '[field] = 0x53657175656c697a65'
       });
     });

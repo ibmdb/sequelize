@@ -76,7 +76,7 @@ module.exports = {
       requestTimeout: 60000
     },
     pool: {
-      max: process.env.SEQ_DB2_POOL_MAX  || process.env.SEQ_POOL_MAX  || 5,
+      max: process.env.SEQ_DB2_POOL_MAX  || process.env.SEQ_POOL_MAX  || 50,
       idle: process.env.SEQ_DB2_POOL_IDLE || process.env.SEQ_POOL_IDLE || 60000
     }
   }

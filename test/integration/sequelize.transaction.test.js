@@ -48,7 +48,8 @@ if (current.dialect.supports.transactions) {
           });
       });
 
-      if (Support.getTestDialect() !== 'sqlite') {
+      if (Support.getTestDialect() !== 'sqlite' &&
+          Support.getTestDialect() !== 'db2') {
         it('works for long running transactions', function() {
           return Support.prepareTransactionTest(this.sequelize).bind(this).then(function(sequelize) {
             this.sequelize = sequelize;
