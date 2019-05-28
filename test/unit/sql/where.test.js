@@ -478,6 +478,7 @@ describe(Support.getTestDialectTeaser('SQL'), () => {
       }, {
         default: "[date] BETWEEN '2013-01-01 00:00:00.000 +00:00' AND '2013-01-11 00:00:00.000 +00:00'",
         mysql: "`date` BETWEEN '2013-01-01 00:00:00' AND '2013-01-11 00:00:00'",
+        db2: "\"date\" BETWEEN '2013-01-01 00:00:00' AND '2013-01-11 00:00:00'",
         mariadb: "`date` BETWEEN '2013-01-01 00:00:00.000' AND '2013-01-11 00:00:00.000'"
       });
 

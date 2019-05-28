@@ -118,6 +118,7 @@ describe(Support.getTestDialectTeaser('SQL'), () => {
         {
           query: {
             postgres: 'INSERT INTO "users" ("user_name") VALUES ($1);',
+            db2: 'SELECT * FROM FINAL TABLE(INSERT INTO "users" ("user_name") VALUES ($1));',
             mssql: 'INSERT INTO [users] ([user_name]) VALUES ($1);',
             default: 'INSERT INTO `users` (`user_name`) VALUES ($1);'
           },
