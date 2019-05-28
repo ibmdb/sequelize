@@ -2,8 +2,8 @@
 
 const chai = require('chai');
 const expect = chai.expect;
-const Support = require(__dirname + '/../support');
-const DataTypes = require(__dirname + '/../../../lib/data-types');
+const Support = require('../support');
+const DataTypes = require('../../../lib/data-types');
 const dialect = Support.getTestDialect();
 
 describe(Support.getTestDialectTeaser('QueryInterface'), () => {
@@ -13,7 +13,7 @@ describe(Support.getTestDialectTeaser('QueryInterface'), () => {
   });
 
   afterEach(function() {
-    return this.sequelize.dropAllSchemas();
+    return Support.dropTestSchemas(this.sequelize);
   });
 
   describe('changeColumn', () => {
@@ -92,7 +92,7 @@ describe(Support.getTestDialectTeaser('QueryInterface'), () => {
     // MSSQL doesn't support using a modified column in a check constraint.
     // https://docs.microsoft.com/en-us/sql/t-sql/statements/alter-table-transact-sql
     if (dialect !== 'mssql' && dialect !== 'db2') {
-      it('should work with enums', function() {
+      it('should work with enums (case 1)', function() {
         return this.queryInterface.createTable({
           tableName: 'users'
         }, {
@@ -100,6 +100,19 @@ describe(Support.getTestDialectTeaser('QueryInterface'), () => {
         }).then(() => {
           return this.queryInterface.changeColumn('users', 'firstName', {
             type: DataTypes.ENUM(['value1', 'value2', 'value3'])
+          });
+        });
+      });
+
+      it('should work with enums (case 2)', function() {
+        return this.queryInterface.createTable({
+          tableName: 'users'
+        }, {
+          firstName: DataTypes.STRING
+        }).then(() => {
+          return this.queryInterface.changeColumn('users', 'firstName', {
+            type: DataTypes.ENUM,
+            values: ['value1', 'value2', 'value3']
           });
         });
       });
@@ -123,7 +136,7 @@ describe(Support.getTestDialectTeaser('QueryInterface'), () => {
       });
     }
 
-    //SQlite navitely doesnt support ALTER Foreign key
+    //SQlite natively doesn't support ALTER Foreign key
     if (dialect !== 'sqlite') {
       describe('should support foreign keys', () => {
         beforeEach(function() {
@@ -216,7 +229,22 @@ describe(Support.getTestDialectTeaser('QueryInterface'), () => {
             expect(describedTable.level_id.allowNull).to.be.equal(true);
           });
         });
-        
+
+        it('should change the comment of column', function() {
+          return this.queryInterface.describeTable({
+            tableName: 'users'
+          }).then(describedTable => {
+            expect(describedTable.level_id.comment).to.be.equal(null);
+            return this.queryInterface.changeColumn('users', 'level_id', {
+              type: DataTypes.INTEGER,
+              comment: 'FooBar'
+            });
+          }).then(() => {
+            return this.queryInterface.describeTable({ tableName: 'users' });
+          }).then(describedTable2 => {
+            expect(describedTable2.level_id.comment).to.be.equal('FooBar');
+          });
+        });
       });
     }
   });

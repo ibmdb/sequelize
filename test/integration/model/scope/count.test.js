@@ -4,8 +4,8 @@ const chai = require('chai'),
   Sequelize = require('../../../../index'),
   Op = Sequelize.Op,
   expect = chai.expect,
-  Promise = require(__dirname + '/../../../../lib/promise'),
-  Support = require(__dirname + '/../../support');
+  Promise = require('../../../../lib/promise'),
+  Support = require('../../support');
 
 describe(Support.getTestDialectTeaser('Model'), () => {
   describe('scope', () => {
@@ -73,20 +73,20 @@ describe(Support.getTestDialectTeaser('Model'), () => {
             },
             withAliasedField: {
               where: {
-                aliasValue: { [Sequelize.Op.ne]: 1 }
+                aliasValue: { [Op.ne]: 1 }
               }
-            },
+            }
           }
         });
         this.Child.belongsTo(this.ScopeMe);
         this.ScopeMe.hasMany(this.Child);
 
-        return this.sequelize.sync({force: true}).then(() => {
+        return this.sequelize.sync({ force: true }).then(() => {
           const records = [
-            {username: 'tony', email: 'tony@sequelizejs.com', access_level: 3, other_value: 7, aliasValue: 12 },
-            {username: 'tobi', email: 'tobi@fakeemail.com', access_level: 10, other_value: 11, aliasValue: 5 },
-            {username: 'dan', email: 'dan@sequelizejs.com', access_level: 5, other_value: 10, aliasValue: 1 },
-            {username: 'fred', email: 'fred@foobar.com', access_level: 3, other_value: 7, aliasValue: 10 }
+            { username: 'tony', email: 'tony@sequelizejs.com', access_level: 3, other_value: 7, aliasValue: 12 },
+            { username: 'tobi', email: 'tobi@fakeemail.com', access_level: 10, other_value: 11, aliasValue: 5 },
+            { username: 'dan', email: 'dan@sequelizejs.com', access_level: 5, other_value: 10, aliasValue: 1 },
+            { username: 'fred', email: 'fred@foobar.com', access_level: 3, other_value: 7, aliasValue: 10 }
           ];
           return this.ScopeMe.bulkCreate(records);
         }).then(() => {
@@ -108,7 +108,7 @@ describe(Support.getTestDialectTeaser('Model'), () => {
       });
 
       it('should be able to override default scope', function() {
-        return expect(this.ScopeMe.count({ where: { access_level: { [Op.gt]: 5 }}})).to.eventually.equal(1);
+        return expect(this.ScopeMe.count({ where: { access_level: { [Op.gt]: 5 } } })).to.eventually.equal(1);
       });
 
       it('should be able to unscope', function() {
@@ -120,7 +120,7 @@ describe(Support.getTestDialectTeaser('Model'), () => {
       });
 
       it('should be able to merge scopes with where', function() {
-        return expect(this.ScopeMe.scope('lowAccess').count({ where: { username: 'dan'}})).to.eventually.equal(1);
+        return expect(this.ScopeMe.scope('lowAccess').count({ where: { username: 'dan' } })).to.eventually.equal(1);
       });
 
       it('should be able to merge scopes with where on aliased fields', function() {

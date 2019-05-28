@@ -2,9 +2,10 @@
 
 const chai = require('chai'),
   expect = chai.expect,
-  Support = require(__dirname + '/support'),
+  Support = require('./support'),
   Sequelize = Support.Sequelize,
-  dialect = Support.getTestDialect();
+  dialect = Support.getTestDialect(),
+  path = require('path');
 
 describe('Sequelize', () => {
   describe('dialect is required', () => {
@@ -76,21 +77,21 @@ describe('Sequelize', () => {
           const sequelize = new Sequelize('sqlite:subfolder/dbname.db');
           const options = sequelize.options;
           expect(options.dialect).to.equal('sqlite');
-          expect(options.storage).to.equal('subfolder/dbname.db');
+          expect(options.storage).to.equal(path.resolve('subfolder', 'dbname.db'));
         });
 
         it('should accept absolute paths for sqlite', () => {
           const sequelize = new Sequelize('sqlite:/home/abs/dbname.db');
           const options = sequelize.options;
           expect(options.dialect).to.equal('sqlite');
-          expect(options.storage).to.equal('/home/abs/dbname.db');
+          expect(options.storage).to.equal(path.resolve('/home/abs/dbname.db'));
         });
 
         it('should prefer storage in options object', () => {
-          const sequelize = new Sequelize('sqlite:/home/abs/dbname.db', {storage: '/completely/different/path.db'});
+          const sequelize = new Sequelize('sqlite:/home/abs/dbname.db', { storage: '/completely/different/path.db' });
           const options = sequelize.options;
           expect(options.dialect).to.equal('sqlite');
-          expect(options.storage).to.equal('/completely/different/path.db');
+          expect(options.storage).to.equal(path.resolve('/completely/different/path.db'));
         });
 
         it('should be able to use :memory:', () => {
@@ -152,6 +153,31 @@ describe('Sequelize', () => {
       }
 
       expect(config.port).to.equal(port);
+    });
+
+    it('should pass query string parameters to dialectOptions', () => {
+      const sequelize = new Sequelize('mysql://example.com:9821/dbname?ssl=true');
+      const dialectOptions = sequelize.config.dialectOptions;
+
+      expect(dialectOptions.ssl).to.equal('true');
+    });
+
+    it('should merge query string parameters to options', () => {
+      const sequelize = new Sequelize('mysql://example.com:9821/dbname?ssl=true&application_name=client', {
+        storage: '/completely/different/path.db',
+        dialectOptions: {
+          supportBigNumbers: true,
+          application_name: 'server' // eslint-disable-line
+        }
+      });
+
+      const options = sequelize.options;
+      const dialectOptions = sequelize.config.dialectOptions;
+
+      expect(options.storage).to.equal('/completely/different/path.db');
+      expect(dialectOptions.supportBigNumbers).to.be.true;
+      expect(dialectOptions.application_name).to.equal('client');
+      expect(dialectOptions.ssl).to.equal('true');
     });
   });
 });

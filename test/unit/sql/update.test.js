@@ -1,7 +1,7 @@
 'use strict';
 
-const Support   = require(__dirname + '/../support'),
-  DataTypes = require(__dirname + '/../../../lib/data-types'),
+const Support   = require('../support'),
+  DataTypes = require('../../../lib/data-types'),
   expectsql = Support.expectsql,
   current   = Support.sequelize,
   sql       = current.dialect.QueryGenerator;
@@ -25,10 +25,10 @@ describe(Support.getTestDialectTeaser('SQL'), () => {
         returning: true,
         hasTrigger: true
       };
-      expectsql(sql.updateQuery(User.tableName, {user_name: 'triggertest'}, {id: 2}, options, User.rawAttributes),
+      expectsql(sql.updateQuery(User.tableName, { user_name: 'triggertest' }, { id: 2 }, options, User.rawAttributes),
         {
           query: {
-            mssql: 'declare @tmp table ([id] INTEGER,[user_name] NVARCHAR(255));UPDATE [users] SET [user_name]=$1 OUTPUT INSERTED.[id],INSERTED.[user_name] into @tmp WHERE [id] = $2;select * from @tmp',
+            mssql: 'declare @tmp table ([id] INTEGER,[user_name] NVARCHAR(255)); UPDATE [users] SET [user_name]=$1 OUTPUT INSERTED.[id],INSERTED.[user_name] into @tmp WHERE [id] = $2;select * from @tmp',
             postgres: 'UPDATE "users" SET "user_name"=$1 WHERE "id" = $2 RETURNING *',
             db2: 'SELECT * FROM FINAL TABLE (UPDATE "users" SET "user_name"=$1 WHERE "id" = $2)',
             default: 'UPDATE `users` SET `user_name`=$1 WHERE `id` = $2'
@@ -55,6 +55,7 @@ describe(Support.getTestDialectTeaser('SQL'), () => {
       expectsql(sql.updateQuery(User.tableName, { username: 'new.username' }, { username: 'username' }, { limit: 1 }), {
         query: {
           mssql: 'UPDATE TOP(1) [Users] SET [username]=$1 OUTPUT INSERTED.* WHERE [username] = $2',
+          mariadb: 'UPDATE `Users` SET `username`=$1 WHERE `username` = $2 LIMIT 1',
           mysql: 'UPDATE `Users` SET `username`=$1 WHERE `username` = $2 LIMIT 1',
           sqlite: 'UPDATE `Users` SET `username`=$1 WHERE rowid IN (SELECT rowid FROM `Users` WHERE `username` = $2 LIMIT 1)',
           db2: 'SELECT * FROM FINAL TABLE (UPDATE (SELECT * FROM "Users" WHERE "username" = $2 FETCH NEXT 1 ROWS ONLY) SET "username"=$1)',

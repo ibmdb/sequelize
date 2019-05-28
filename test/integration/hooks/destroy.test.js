@@ -2,8 +2,8 @@
 
 const chai = require('chai'),
   expect = chai.expect,
-  Support = require(__dirname + '/../support'),
-  DataTypes = require(__dirname + '/../../../lib/data-types'),
+  Support = require('../support'),
+  DataTypes = require('../../../lib/data-types'),
   sinon = require('sinon');
 
 describe(Support.getTestDialectTeaser('Hooks'), () => {
@@ -30,7 +30,7 @@ describe(Support.getTestDialectTeaser('Hooks'), () => {
         this.User.beforeDestroy(beforeHook);
         this.User.afterDestroy(afterHook);
 
-        return this.User.create({username: 'Toni', mood: 'happy'}).then(user => {
+        return this.User.create({ username: 'Toni', mood: 'happy' }).then(user => {
           return user.destroy().then(() => {
             expect(beforeHook).to.have.been.calledOnce;
             expect(afterHook).to.have.been.calledOnce;
@@ -50,7 +50,7 @@ describe(Support.getTestDialectTeaser('Hooks'), () => {
         });
         this.User.afterDestroy(afterHook);
 
-        return this.User.create({username: 'Toni', mood: 'happy'}).then(user => {
+        return this.User.create({ username: 'Toni', mood: 'happy' }).then(user => {
           return expect(user.destroy()).to.be.rejected.then(() => {
             expect(beforeHook).to.have.been.calledOnce;
             expect(afterHook).not.to.have.been.called;
@@ -68,7 +68,7 @@ describe(Support.getTestDialectTeaser('Hooks'), () => {
           throw new Error('Whoops!');
         });
 
-        return this.User.create({username: 'Toni', mood: 'happy'}).then(user => {
+        return this.User.create({ username: 'Toni', mood: 'happy' }).then(user => {
           return expect(user.destroy()).to.be.rejected.then(() => {
             expect(beforeHook).to.have.been.calledOnce;
             expect(afterHook).to.have.been.calledOnce;

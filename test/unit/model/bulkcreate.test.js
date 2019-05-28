@@ -3,10 +3,9 @@
 const chai = require('chai'),
   expect = chai.expect,
   sinon = require('sinon'),
-  Support   = require(__dirname + '/../support'),
+  Support = require('../support'),
   DataTypes = require('../../../lib/data-types'),
-  current   = Support.sequelize,
-  Promise = current.Promise;
+  current = Support.sequelize;
 
 describe(Support.getTestDialectTeaser('Model'), () => {
   describe('bulkCreate', () => {
@@ -19,7 +18,7 @@ describe(Support.getTestDialectTeaser('Model'), () => {
         }
       }, { timestamps: false });
 
-      this.stub = sinon.stub(current.getQueryInterface(), 'bulkInsert').returns(Promise.resolve([]));
+      this.stub = sinon.stub(current.getQueryInterface(), 'bulkInsert').resolves([]);
     });
 
     afterEach(function() {

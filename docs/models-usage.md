@@ -2,14 +2,15 @@
 
 ## Data retrieval / Finders
 
-Finder methods are intended to query data from the database. They do *not* return plain objects but instead return model instances. Because finder methods return model instances you can call any model instance member on the result as described in the documentation for [*instances*](/manual/tutorial/instances.html).
+Finder methods are intended to query data from the database. They do *not* return plain objects but instead return model instances. Because finder methods return model instances you can call any model instance member on the result as described in the documentation for [*instances*](/manual/instances.html).
 
 In this document we'll explore what finder methods can do:
 
 ### `find` - Search for one specific element in the database
+
 ```js
 // search for known ids
-Project.findById(123).then(project => {
+Project.findByPk(123).then(project => {
   // project will be an instance of Project and stores the content of the table entry
   // with id 123. if such an entry is not defined you will get null
 })
@@ -25,7 +26,7 @@ Project.findOne({
   attributes: ['id', ['name', 'title']]
 }).then(project => {
   // project will be the first entry of the Projects table with the title 'aProject' || null
-  // project.title will contain the name of the project
+  // project.get('title') will contain the name of the project
 })
 ```
 
@@ -38,14 +39,15 @@ Let's assume we have an empty database with a `User` model which has a `username
 ```js
 User
   .findOrCreate({where: {username: 'sdepold'}, defaults: {job: 'Technical Lead JavaScript'}})
-  .spread((user, created) => {
+  .then(([user, created]) => {
     console.log(user.get({
       plain: true
     }))
     console.log(created)
 
     /*
-     findOrCreate returns an array containing the object that was found or created and a boolean that will be true if a new object was created and false if not, like so:
+     findOrCreate returns an array containing the object that was found or created and a boolean that
+     will be true if a new object was created and false if not, like so:
 
     [ {
         username: 'sdepold',
@@ -56,16 +58,20 @@ User
       },
       true ]
 
- In the example above, the "spread" on line 39 divides the array into its 2 parts and passes them as arguments to the callback function defined beginning at line 39, which treats them as "user" and "created" in this case. (So "user" will be the object from index 0 of the returned array and "created" will equal "true".)
+ In the example above, the array spread on line 3 divides the array into its 2 parts and passes them
+  as arguments to the callback function defined beginning at line 39, which treats them as "user" and
+  "created" in this case. (So "user" will be the object from index 0 of the returned array and
+  "created" will equal "true".)
     */
   })
 ```
 
 The code created a new instance. So when we already have an instance ...
+
 ```js
 User.create({ username: 'fnord', job: 'omnomnom' })
   .then(() => User.findOrCreate({where: {username: 'fnord'}, defaults: {job: 'something else'}}))
-  .spread((user, created) => {
+  .then(([user, created]) => {
     console.log(user.get({
       plain: true
     }))
@@ -82,7 +88,10 @@ User.create({ username: 'fnord', job: 'omnomnom' })
       },
       false
     ]
-    The array returned by findOrCreate gets spread into its 2 parts by the "spread" on line 69, and the parts will be passed as 2 arguments to the callback function beginning on line 69, which will then treat them as "user" and "created" in this case. (So "user" will be the object from index 0 of the returned array and "created" will equal "false".)
+    The array returned by findOrCreate gets spread into its 2 parts by the array spread on line 3, and
+    the parts will be passed as 2 arguments to the callback function beginning on line 69, which will
+    then treat them as "user" and "created" in this case. (So "user" will be the object from index 0
+    of the returned array and "created" will equal "false".)
     */
   })
 ```
@@ -118,6 +127,7 @@ Project
 It support includes. Only the includes that are marked as `required` will be added to the count part:
 
 Suppose you want to find all users who have a profile attached:
+
 ```js
 User.findAndCountAll({
   include: [
@@ -140,18 +150,13 @@ User.findAndCountAll({
 
 The query above will only count users who have an active profile, because `required` is implicitly set to true when you add a where clause to the include.
 
-
 The options object that you pass to `findAndCountAll` is the same as for `findAll` (described below).
 
 ### `findAll` - Search for multiple elements in the database
+
 ```js
 // find multiple entries
 Project.findAll().then(projects => {
-  // projects will be an array of all Project instances
-})
-
-// also possible:
-Project.all().then(projects => {
   // projects will be an array of all Project instances
 })
 
@@ -280,7 +285,7 @@ Project.findAll({ offset: 10, limit: 2 })
 The syntax for grouping and ordering are equal, so below it is only explained with a single example for group, and the rest for order. Everything you see below can also be done for group
 
 ```js
-Project.findAll({order: 'title DESC'})
+Project.findAll({order: [['title', 'DESC']]})
 // yields ORDER BY title DESC
 
 Project.findAll({group: 'name'})
@@ -408,9 +413,12 @@ Project.sum('age', { where: { age: { [Op.gt]: 5 } } }).then(sum => {
 When you are retrieving data from the database there is a fair chance that you also want to get associations with the same query - this is called eager loading. The basic idea behind that, is the use of the attribute `include` when you are calling `find` or `findAll`. Lets assume the following setup:
 
 ```js
-const User = sequelize.define('user', { name: Sequelize.STRING })
-const Task = sequelize.define('task', { name: Sequelize.STRING })
-const Tool = sequelize.define('tool', { name: Sequelize.STRING })
+class User extends Model {}
+User.init({ name: Sequelize.STRING }, { sequelize, modelName: 'user' })
+class Task extends Model {}
+Task.init({ name: Sequelize.STRING }, { sequelize, modelName: 'task' })
+class Tool extends Model {}
+Tool.init({ name: Sequelize.STRING }, { sequelize, modelName: 'tool' })
 
 Task.belongsTo(User)
 User.hasMany(Task)
@@ -472,7 +480,6 @@ User.findAll({ include: [ Task ] }).then(users => {
 ```
 
 Notice that the accessor (the `Tasks` property in the resulting instance) is plural because the association is many-to-something.
-
 
 If an association is aliased (using the `as` option), you must specify this alias when including the model. Notice how the user's `Tool`s are aliased as `Instruments` above. In order to get that right you have to specify the model you want to load, as well as the alias:
 
@@ -689,6 +696,7 @@ Company.findAll({
 ```
 
 ### Nested eager loading
+
 You can use nested eager loading to load all related models of a related model:
 
 ```js

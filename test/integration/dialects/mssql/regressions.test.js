@@ -2,14 +2,14 @@
 
 const chai = require('chai'),
   expect = chai.expect,
-  Support = require(__dirname + '/../../support'),
+  Support = require('../../support'),
   Sequelize = Support.Sequelize,
   Op = Sequelize.Op,
   dialect = Support.getTestDialect();
 
 if (dialect.match(/^mssql/)) {
   describe('[MSSQL Specific] Regressions', () => {
-    it('does not duplicate columns in ORDER BY statement, #9008', function () {
+    it('does not duplicate columns in ORDER BY statement, #9008', function() {
       const LoginLog = this.sequelize.define('LoginLog', {
         ID: {
           field: 'id',
@@ -52,7 +52,7 @@ if (dialect.match(/^mssql/)) {
           { UserName: 'Nikita' },
           { UserName: 'Aryamaan' }
         ], { returning: true }))
-        .spread((vyom, shakti, nikita, arya) => {
+        .then(([vyom, shakti, nikita, arya]) => {
           return Sequelize.Promise.all([
             vyom.createLoginLog(),
             shakti.createLoginLog(),
@@ -80,6 +80,19 @@ if (dialect.match(/^mssql/)) {
           expect(logs[0].User.get('UserName')).to.equal('Shaktimaan');
           expect(logs[1].User.get('UserName')).to.equal('Aryamaan');
         });
+    });
+  });
+
+  it('sets the varchar(max) length correctly on describeTable', function() {
+    const Users = this.sequelize.define('_Users', {
+      username: Sequelize.STRING('MAX')
+    }, { freezeTableName: true });
+
+    return Users.sync({ force: true }).then(() => {
+      return this.sequelize.getQueryInterface().describeTable('_Users').then(metadata => {
+        const username = metadata.username;
+        expect(username.type).to.include('(MAX)');
+      });
     });
   });
 }

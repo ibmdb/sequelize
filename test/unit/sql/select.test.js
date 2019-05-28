@@ -1,24 +1,24 @@
 'use strict';
 
-const Support   = require(__dirname + '/../support'),
-  DataTypes = require(__dirname + '/../../../lib/data-types'),
-  Model = require(__dirname + '/../../../lib/model'),
+const Support = require('../support'),
+  DataTypes = require('../../../lib/data-types'),
+  Model = require('../../../lib/model'),
   util = require('util'),
   chai = require('chai'),
   expect = chai.expect,
   expectsql = Support.expectsql,
-  current   = Support.sequelize,
-  sql       = current.dialect.QueryGenerator,
-  Op        = current.Op;
+  current = Support.sequelize,
+  sql = current.dialect.QueryGenerator,
+  Op = Support.Sequelize.Op;
 
 // Notice: [] will be replaced by dialect specific tick/quote character when there is not dialect specific expectation but only a default expectation
 
-suite(Support.getTestDialectTeaser('SQL'), () => {
-  suite('select', () => {
+describe(Support.getTestDialectTeaser('SQL'), () => {
+  describe('select', () => {
     const testsql = function(options, expectation) {
       const model = options.model;
 
-      test(util.inspect(options, {depth: 2}), () => {
+      it(util.inspect(options, { depth: 2 }), () => {
         return expectsql(
           sql.selectQuery(
             options.table || model && model.getTableName(),
@@ -68,12 +68,12 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
         ]
       }
     }, {
-      default: 'SELECT [User].* FROM ('+
+      default: `SELECT [User].* FROM (${
         [
-          '(SELECT [email], [first_name] AS [firstName], [last_name] AS [lastName] FROM [User] WHERE [User].[companyId] = 1 ORDER BY [last_name] ASC'+sql.addLimitAndOffset({ limit: 3, order: ['last_name', 'ASC'] })+')',
-          '(SELECT [email], [first_name] AS [firstName], [last_name] AS [lastName] FROM [User] WHERE [User].[companyId] = 5 ORDER BY [last_name] ASC'+sql.addLimitAndOffset({ limit: 3, order: ['last_name', 'ASC'] })+')'
+          `SELECT * FROM (SELECT [email], [first_name] AS [firstName], [last_name] AS [lastName] FROM [User] WHERE [User].[companyId] = 1 ORDER BY [last_name] ASC${sql.addLimitAndOffset({ limit: 3, order: ['last_name', 'ASC'] })}) AS sub`,
+          `SELECT * FROM (SELECT [email], [first_name] AS [firstName], [last_name] AS [lastName] FROM [User] WHERE [User].[companyId] = 5 ORDER BY [last_name] ASC${sql.addLimitAndOffset({ limit: 3, order: ['last_name', 'ASC'] })}) AS sub`
         ].join(current.dialect.supports['UNION ALL'] ?' UNION ALL ' : ' UNION ')
-      +') AS [User];'
+      }) AS [User];`
     });
 
     (function() {
@@ -121,12 +121,12 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
           ]
         }
       }, {
-        default: 'SELECT [user].* FROM ('+
+        default: `SELECT [user].* FROM (${
           [
-            '(SELECT [user].[id_user] AS [id], [user].[last_name] AS [subquery_order_0], [project_users].[user_id] AS [project_users.userId], [project_users].[project_id] AS [project_users.projectId] FROM [users] AS [user] INNER JOIN [project_users] AS [project_users] ON [user].[id_user] = [project_users].[user_id] AND [project_users].[project_id] = 1 ORDER BY [subquery_order_0] ASC'+ (current.dialect.name === 'mssql' ? ', [user].[id_user]' : '') + sql.addLimitAndOffset({ limit: 3, order: ['last_name', 'ASC'] })+')',
-            '(SELECT [user].[id_user] AS [id], [user].[last_name] AS [subquery_order_0], [project_users].[user_id] AS [project_users.userId], [project_users].[project_id] AS [project_users.projectId] FROM [users] AS [user] INNER JOIN [project_users] AS [project_users] ON [user].[id_user] = [project_users].[user_id] AND [project_users].[project_id] = 5 ORDER BY [subquery_order_0] ASC'+ (current.dialect.name === 'mssql' ? ', [user].[id_user]' : '') +sql.addLimitAndOffset({ limit: 3, order: ['last_name', 'ASC'] })+')'
+            `SELECT * FROM (SELECT [user].[id_user] AS [id], [user].[last_name] AS [subquery_order_0], [project_users].[user_id] AS [project_users.userId], [project_users].[project_id] AS [project_users.projectId] FROM [users] AS [user] INNER JOIN [project_users] AS [project_users] ON [user].[id_user] = [project_users].[user_id] AND [project_users].[project_id] = 1 ORDER BY [subquery_order_0] ASC${ current.dialect.name === 'mssql' ? ', [user].[id_user]' : ''}${sql.addLimitAndOffset({ limit: 3, order: ['last_name', 'ASC'] })}) AS sub`,
+            `SELECT * FROM (SELECT [user].[id_user] AS [id], [user].[last_name] AS [subquery_order_0], [project_users].[user_id] AS [project_users.userId], [project_users].[project_id] AS [project_users.projectId] FROM [users] AS [user] INNER JOIN [project_users] AS [project_users] ON [user].[id_user] = [project_users].[user_id] AND [project_users].[project_id] = 5 ORDER BY [subquery_order_0] ASC${ current.dialect.name === 'mssql' ? ', [user].[id_user]' : ''}${sql.addLimitAndOffset({ limit: 3, order: ['last_name', 'ASC'] })}) AS sub`
           ].join(current.dialect.supports['UNION ALL'] ?' UNION ALL ' : ' UNION ')
-        +') AS [user] ORDER BY [subquery_order_0] ASC;'
+        }) AS [user] ORDER BY [subquery_order_0] ASC;`
       });
 
       testsql({
@@ -152,12 +152,12 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
           ]
         }
       }, {
-        default: 'SELECT [user].* FROM ('+
-        [
-          '(SELECT [user].[id_user] AS [id], [user].[last_name] AS [subquery_order_0], [project_users].[user_id] AS [project_users.userId], [project_users].[project_id] AS [project_users.projectId] FROM [users] AS [user] INNER JOIN [project_users] AS [project_users] ON [user].[id_user] = [project_users].[user_id] AND [project_users].[project_id] = 1 AND [project_users].[status] = 1 ORDER BY [subquery_order_0] ASC'+ (current.dialect.name === 'mssql' ? ', [user].[id_user]' : '') + sql.addLimitAndOffset({ limit: 3, order: ['last_name', 'ASC'] })+')',
-          '(SELECT [user].[id_user] AS [id], [user].[last_name] AS [subquery_order_0], [project_users].[user_id] AS [project_users.userId], [project_users].[project_id] AS [project_users.projectId] FROM [users] AS [user] INNER JOIN [project_users] AS [project_users] ON [user].[id_user] = [project_users].[user_id] AND [project_users].[project_id] = 5 AND [project_users].[status] = 1 ORDER BY [subquery_order_0] ASC'+ (current.dialect.name === 'mssql' ? ', [user].[id_user]' : '') +sql.addLimitAndOffset({ limit: 3, order: ['last_name', 'ASC'] })+')'
-        ].join(current.dialect.supports['UNION ALL'] ?' UNION ALL ' : ' UNION ')
-        +') AS [user] ORDER BY [subquery_order_0] ASC;'
+        default: `SELECT [user].* FROM (${
+          [
+            `SELECT * FROM (SELECT [user].[id_user] AS [id], [user].[last_name] AS [subquery_order_0], [project_users].[user_id] AS [project_users.userId], [project_users].[project_id] AS [project_users.projectId] FROM [users] AS [user] INNER JOIN [project_users] AS [project_users] ON [user].[id_user] = [project_users].[user_id] AND [project_users].[project_id] = 1 AND [project_users].[status] = 1 ORDER BY [subquery_order_0] ASC${ current.dialect.name === 'mssql' ? ', [user].[id_user]' : ''}${sql.addLimitAndOffset({ limit: 3, order: ['last_name', 'ASC'] })}) AS sub`,
+            `SELECT * FROM (SELECT [user].[id_user] AS [id], [user].[last_name] AS [subquery_order_0], [project_users].[user_id] AS [project_users.userId], [project_users].[project_id] AS [project_users.projectId] FROM [users] AS [user] INNER JOIN [project_users] AS [project_users] ON [user].[id_user] = [project_users].[user_id] AND [project_users].[project_id] = 5 AND [project_users].[status] = 1 ORDER BY [subquery_order_0] ASC${ current.dialect.name === 'mssql' ? ', [user].[id_user]' : ''}${sql.addLimitAndOffset({ limit: 3, order: ['last_name', 'ASC'] })}) AS sub`
+          ].join(current.dialect.supports['UNION ALL'] ?' UNION ALL ' : ' UNION ')
+        }) AS [user] ORDER BY [subquery_order_0] ASC;`
       });
 
 
@@ -184,12 +184,12 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
           ]
         }
       }, {
-        default: 'SELECT [user].* FROM ('+
+        default: `SELECT [user].* FROM (${
           [
-            '(SELECT [user].[id_user] AS [id], [user].[id_user] AS [subquery_order_0], [project_users].[user_id] AS [project_users.userId], [project_users].[project_id] AS [project_users.projectId] FROM [users] AS [user] INNER JOIN [project_users] AS [project_users] ON [user].[id_user] = [project_users].[user_id] AND [project_users].[project_id] = 1 WHERE [user].[age] >= 21 ORDER BY [subquery_order_0] ASC'+ (current.dialect.name === 'mssql' ? ', [user].[id_user]' : '') + sql.addLimitAndOffset({ limit: 3, order: ['last_name', 'ASC'] })+')',
-            '(SELECT [user].[id_user] AS [id], [user].[id_user] AS [subquery_order_0], [project_users].[user_id] AS [project_users.userId], [project_users].[project_id] AS [project_users.projectId] FROM [users] AS [user] INNER JOIN [project_users] AS [project_users] ON [user].[id_user] = [project_users].[user_id] AND [project_users].[project_id] = 5 WHERE [user].[age] >= 21 ORDER BY [subquery_order_0] ASC'+ (current.dialect.name === 'mssql' ? ', [user].[id_user]' : '') +sql.addLimitAndOffset({ limit: 3, order: ['last_name', 'ASC'] })+')'
+            `SELECT * FROM (SELECT [user].[id_user] AS [id], [user].[id_user] AS [subquery_order_0], [project_users].[user_id] AS [project_users.userId], [project_users].[project_id] AS [project_users.projectId] FROM [users] AS [user] INNER JOIN [project_users] AS [project_users] ON [user].[id_user] = [project_users].[user_id] AND [project_users].[project_id] = 1 WHERE [user].[age] >= 21 ORDER BY [subquery_order_0] ASC${ current.dialect.name === 'mssql' ? ', [user].[id_user]' : ''}${sql.addLimitAndOffset({ limit: 3, order: ['last_name', 'ASC'] })}) AS sub`,
+            `SELECT * FROM (SELECT [user].[id_user] AS [id], [user].[id_user] AS [subquery_order_0], [project_users].[user_id] AS [project_users.userId], [project_users].[project_id] AS [project_users.projectId] FROM [users] AS [user] INNER JOIN [project_users] AS [project_users] ON [user].[id_user] = [project_users].[user_id] AND [project_users].[project_id] = 5 WHERE [user].[age] >= 21 ORDER BY [subquery_order_0] ASC${ current.dialect.name === 'mssql' ? ', [user].[id_user]' : ''}${sql.addLimitAndOffset({ limit: 3, order: ['last_name', 'ASC'] })}) AS sub`
           ].join(current.dialect.supports['UNION ALL'] ?' UNION ALL ' : ' UNION ')
-        +') AS [user] ORDER BY [subquery_order_0] ASC;'
+        }) AS [user] ORDER BY [subquery_order_0] ASC;`
       });
     }());
 
@@ -225,7 +225,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
         tableName: 'post'
       });
 
-      User.Posts = User.hasMany(Post, {foreignKey: 'userId', as: 'POSTS'});
+      User.Posts = User.hasMany(Post, { foreignKey: 'userId', as: 'POSTS' });
 
       const Comment = Support.sequelize.define('Comment', {
         title: DataTypes.STRING,
@@ -238,7 +238,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
         tableName: 'comment'
       });
 
-      Post.Comments = Post.hasMany(Comment, {foreignKey: 'postId', as: 'COMMENTS'});
+      Post.Comments = Post.hasMany(Comment, { foreignKey: 'postId', as: 'COMMENTS' });
 
       const include = Model._validateIncludedElements({
         include: [{
@@ -270,12 +270,12 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
           ]
         }
       }, {
-        default: 'SELECT [user].*, [POSTS].[id] AS [POSTS.id], [POSTS].[title] AS [POSTS.title] FROM ('+
+        default: `SELECT [user].*, [POSTS].[id] AS [POSTS.id], [POSTS].[title] AS [POSTS.title] FROM (${
           [
-            '(SELECT [id_user] AS [id], [email], [first_name] AS [firstName], [last_name] AS [lastName] FROM [users] AS [user] WHERE [user].[companyId] = 1 ORDER BY [user].[last_name] ASC'+sql.addLimitAndOffset({ limit: 3, order: [['last_name', 'ASC']] })+')',
-            '(SELECT [id_user] AS [id], [email], [first_name] AS [firstName], [last_name] AS [lastName] FROM [users] AS [user] WHERE [user].[companyId] = 5 ORDER BY [user].[last_name] ASC'+sql.addLimitAndOffset({ limit: 3, order: [['last_name', 'ASC']] })+')'
+            `SELECT * FROM (SELECT [id_user] AS [id], [email], [first_name] AS [firstName], [last_name] AS [lastName] FROM [users] AS [user] WHERE [user].[companyId] = 1 ORDER BY [user].[last_name] ASC${sql.addLimitAndOffset({ limit: 3, order: [['last_name', 'ASC']] })}) AS sub`,
+            `SELECT * FROM (SELECT [id_user] AS [id], [email], [first_name] AS [firstName], [last_name] AS [lastName] FROM [users] AS [user] WHERE [user].[companyId] = 5 ORDER BY [user].[last_name] ASC${sql.addLimitAndOffset({ limit: 3, order: [['last_name', 'ASC']] })}) AS sub`
           ].join(current.dialect.supports['UNION ALL'] ?' UNION ALL ' : ' UNION ')
-        +') AS [user] LEFT OUTER JOIN [post] AS [POSTS] ON [user].[id] = [POSTS].[user_id];'
+        }) AS [user] LEFT OUTER JOIN [post] AS [POSTS] ON [user].[id] = [POSTS].[user_id];`
       });
 
       testsql({
@@ -294,10 +294,10 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
         hasMultiAssociation: true, //must be set only for mssql dialect here
         subQuery: true
       }, {
-        default: 'SELECT [user].*, [POSTS].[id] AS [POSTS.id], [POSTS].[title] AS [POSTS.title] FROM (' +
-                       'SELECT [user].[id_user] AS [id], [user].[email], [user].[first_name] AS [firstName], [user].[last_name] AS [lastName] FROM [users] AS [user] ORDER BY [user].[last_name] ASC' +
-                       sql.addLimitAndOffset({ limit: 30, offset: 10, order: [['`user`.`last_name`', 'ASC']]}) +
-                   ') AS [user] LEFT OUTER JOIN [post] AS [POSTS] ON [user].[id_user] = [POSTS].[user_id] ORDER BY [user].[last_name] ASC;'
+        default: `${'SELECT [user].*, [POSTS].[id] AS [POSTS.id], [POSTS].[title] AS [POSTS.title] FROM (' +
+                       'SELECT [user].[id_user] AS [id], [user].[email], [user].[first_name] AS [firstName], [user].[last_name] AS [lastName] FROM [users] AS [user] ORDER BY [user].[last_name] ASC'}${
+          sql.addLimitAndOffset({ limit: 30, offset: 10, order: [['`user`.`last_name`', 'ASC']] })
+        }) AS [user] LEFT OUTER JOIN [post] AS [POSTS] ON [user].[id_user] = [POSTS].[user_id] ORDER BY [user].[last_name] ASC;`
       });
 
       const nestedInclude = Model._validateIncludedElements({
@@ -334,12 +334,12 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
           ]
         }
       }, {
-        default: 'SELECT [user].*, [POSTS].[id] AS [POSTS.id], [POSTS].[title] AS [POSTS.title], [POSTS->COMMENTS].[id] AS [POSTS.COMMENTS.id], [POSTS->COMMENTS].[title] AS [POSTS.COMMENTS.title] FROM ('+
+        default: `SELECT [user].*, [POSTS].[id] AS [POSTS.id], [POSTS].[title] AS [POSTS.title], [POSTS->COMMENTS].[id] AS [POSTS.COMMENTS.id], [POSTS->COMMENTS].[title] AS [POSTS.COMMENTS.title] FROM (${
           [
-            '(SELECT [id_user] AS [id], [email], [first_name] AS [firstName], [last_name] AS [lastName] FROM [users] AS [user] WHERE [user].[companyId] = 1 ORDER BY [user].[last_name] ASC'+sql.addLimitAndOffset({ limit: 3, order: ['last_name', 'ASC'] })+')',
-            '(SELECT [id_user] AS [id], [email], [first_name] AS [firstName], [last_name] AS [lastName] FROM [users] AS [user] WHERE [user].[companyId] = 5 ORDER BY [user].[last_name] ASC'+sql.addLimitAndOffset({ limit: 3, order: ['last_name', 'ASC'] })+')'
+            `SELECT * FROM (SELECT [id_user] AS [id], [email], [first_name] AS [firstName], [last_name] AS [lastName] FROM [users] AS [user] WHERE [user].[companyId] = 1 ORDER BY [user].[last_name] ASC${sql.addLimitAndOffset({ limit: 3, order: ['last_name', 'ASC'] })}) AS sub`,
+            `SELECT * FROM (SELECT [id_user] AS [id], [email], [first_name] AS [firstName], [last_name] AS [lastName] FROM [users] AS [user] WHERE [user].[companyId] = 5 ORDER BY [user].[last_name] ASC${sql.addLimitAndOffset({ limit: 3, order: ['last_name', 'ASC'] })}) AS sub`
           ].join(current.dialect.supports['UNION ALL'] ?' UNION ALL ' : ' UNION ')
-        +') AS [user] LEFT OUTER JOIN [post] AS [POSTS] ON [user].[id] = [POSTS].[user_id] LEFT OUTER JOIN [comment] AS [POSTS->COMMENTS] ON [POSTS].[id] = [POSTS->COMMENTS].[post_id];'
+        }) AS [user] LEFT OUTER JOIN [post] AS [POSTS] ON [user].[id] = [POSTS].[user_id] LEFT OUTER JOIN [comment] AS [POSTS->COMMENTS] ON [POSTS].[id] = [POSTS->COMMENTS].[post_id];`
       });
     })();
 
@@ -358,7 +358,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
         freezeTableName: true
       });
 
-      User.Posts = User.hasMany(Post, {foreignKey: 'user_id'});
+      User.Posts = User.hasMany(Post, { foreignKey: 'user_id' });
 
       expectsql(sql.selectQuery('User', {
         attributes: ['name', 'age'],
@@ -390,7 +390,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
         freezeTableName: true
       });
 
-      User.Posts = User.hasMany(Post, {foreignKey: 'user_id', as: 'postaliasname'});
+      User.Posts = User.hasMany(Post, { foreignKey: 'user_id', as: 'postaliasname' });
 
       expectsql(sql.selectQuery('User', {
         table: User.getTableName(),
@@ -438,6 +438,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
         }
       }, User), {
         postgres: 'SELECT "name", "age", "data" FROM "User" AS "User" WHERE "User"."data" IN (E\'\\\\x313233\');',
+        mariadb: 'SELECT `name`, `age`, `data` FROM `User` AS `User` WHERE `User`.`data` IN (X\'313233\');',
         mysql: 'SELECT `name`, `age`, `data` FROM `User` AS `User` WHERE `User`.`data` IN (X\'313233\');',
         sqlite: 'SELECT `name`, `age`, `data` FROM `User` AS `User` WHERE `User`.`data` IN (X\'313233\');',
         db2: "SELECT \"name\", \"age\", \"data\" FROM \"User\" AS \"User\" WHERE \"User\".\"data\" IN ('x''313233''');",
@@ -445,8 +446,8 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
       });
     });
 
-    suite('attribute escaping', () => {
-      test('plain attributes (1)', () => {
+    describe('attribute escaping', () => {
+      it('plain attributes (1)', () => {
         expectsql(sql.selectQuery('User', {
           attributes: ['* FROM [User]; DELETE FROM [User];SELECT [id]'.replace(/\[/g, Support.sequelize.dialect.TICK_CHAR_LEFT).replace(/\]/g, Support.sequelize.dialect.TICK_CHAR_RIGHT)]
         }), {
@@ -456,7 +457,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
         });
       });
 
-      test('plain attributes (2)', () => {
+      it('plain attributes (2)', () => {
         expectsql(sql.selectQuery('User', {
           attributes: ['* FROM User; DELETE FROM User;SELECT id']
         }), {
@@ -464,16 +465,16 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
         });
       });
 
-      test('plain attributes (3)', () => {
+      it('plain attributes (3)', () => {
         expectsql(sql.selectQuery('User', {
           attributes: ['a\', * FROM User; DELETE FROM User;SELECT id']
         }), {
-          default: "SELECT [a\', * FROM User; DELETE FROM User;SELECT id] FROM [User];",
+          default: "SELECT [a', * FROM User; DELETE FROM User;SELECT id] FROM [User];",
           mssql: 'SELECT [a, * FROM User; DELETE FROM User;SELECT id] FROM [User];'
         });
       });
 
-      test('plain attributes (4)', () => {
+      it('plain attributes (4)', () => {
         expectsql(sql.selectQuery('User', {
           attributes: ['*, COUNT(*) FROM User; DELETE FROM User;SELECT id']
         }), {
@@ -481,7 +482,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
         });
       });
 
-      test('aliased attributes (1)', () => {
+      it('aliased attributes (1)', () => {
         expectsql(sql.selectQuery('User', {
           attributes: [
             ['* FROM [User]; DELETE FROM [User];SELECT [id]'.replace(/\[/g, Support.sequelize.dialect.TICK_CHAR_LEFT).replace(/\]/g, Support.sequelize.dialect.TICK_CHAR_RIGHT), 'myCol']
@@ -491,7 +492,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
         });
       });
 
-      test('aliased attributes (2)', () => {
+      it('aliased attributes (2)', () => {
         expectsql(sql.selectQuery('User', {
           attributes: [
             ['* FROM User; DELETE FROM User;SELECT id', 'myCol']
@@ -501,7 +502,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
         });
       });
 
-      test('aliased attributes (3)', () => {
+      it('aliased attributes (3)', () => {
         expectsql(sql.selectQuery('User', {
           attributes: [
             ['id', '* FROM User; DELETE FROM User;SELECT id']
@@ -511,7 +512,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
         });
       });
 
-      test('attributes from includes', () => {
+      it('attributes from includes', () => {
         const User = Support.sequelize.define('User', {
           name: DataTypes.STRING,
           age: DataTypes.INTEGER
@@ -526,7 +527,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
           freezeTableName: true
         });
 
-        User.Posts = User.hasMany(Post, {foreignKey: 'user_id'});
+        User.Posts = User.hasMany(Post, { foreignKey: 'user_id' });
 
         expectsql(sql.selectQuery('User', {
           attributes: ['name', 'age'],
@@ -577,22 +578,22 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
     });
   });
 
-  suite('queryIdentifiers: false', () => {
-    suiteSetup(() => {
+  describe('queryIdentifiers: false', () => {
+    beforeEach(() => {
       sql.options.quoteIdentifiers = false;
     });
-    suiteTeardown(() => {
+    afterEach(() => {
       sql.options.quoteIdentifiers = true;
     });
 
-    test('*', () => {
+    it('*', () => {
       expectsql(sql.selectQuery('User'), {
         default: 'SELECT * FROM [User];',
         postgres: 'SELECT * FROM "User";'
       });
     });
 
-    test('with attributes', () => {
+    it('with attributes', () => {
       expectsql(sql.selectQuery('User', {
         attributes: ['name', 'age']
       }), {
@@ -601,7 +602,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
       });
     });
 
-    test('include (left outer join)', () => {
+    it('include (left outer join)', () => {
       const User = Support.sequelize.define('User', {
         name: DataTypes.STRING,
         age: DataTypes.INTEGER
@@ -616,7 +617,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
         freezeTableName: true
       });
 
-      User.Posts = User.hasMany(Post, {foreignKey: 'user_id'});
+      User.Posts = User.hasMany(Post, { foreignKey: 'user_id' });
 
       expectsql(sql.selectQuery('User', {
         attributes: ['name', 'age'],
@@ -635,7 +636,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
     });
 
 
-    test('nested include (left outer join)', () => {
+    it('nested include (left outer join)', () => {
       const User = Support.sequelize.define('User', {
         name: DataTypes.STRING,
         age: DataTypes.INTEGER
@@ -656,8 +657,8 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
         freezeTableName: true
       });
 
-      User.Posts = User.hasMany(Post, {foreignKey: 'user_id'});
-      Post.Comments = Post.hasMany(Comment, {foreignKey: 'post_id'});
+      User.Posts = User.hasMany(Post, { foreignKey: 'user_id' });
+      Post.Comments = Post.hasMany(Comment, { foreignKey: 'post_id' });
 
       expectsql(sql.selectQuery('User', {
         attributes: ['name', 'age'],
@@ -682,8 +683,8 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
 
   });
 
-  suite('raw query', () => {
-    test('raw replacements for where', () => {
+  describe('raw query', () => {
+    it('raw replacements for where', () => {
       expect(() => {
         sql.selectQuery('User', {
           attributes: ['*'],
@@ -692,7 +693,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
       }).to.throw(Error, 'Support for literal replacements in the `where` object has been removed.');
     });
 
-    test('raw replacements for nested where', () => {
+    it('raw replacements for nested where', () => {
       expect(() => {
         sql.selectQuery('User', {
           attributes: ['*'],
@@ -701,7 +702,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
       }).to.throw(Error, 'Support for literal replacements in the `where` object has been removed.');
     });
 
-    test('raw replacements for having', () => {
+    it('raw replacements for having', () => {
       expect(() => {
         sql.selectQuery('User', {
           attributes: ['*'],
@@ -710,7 +711,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
       }).to.throw(Error, 'Support for literal replacements in the `where` object has been removed.');
     });
 
-    test('raw replacements for nested having', () => {
+    it('raw replacements for nested having', () => {
       expect(() => {
         sql.selectQuery('User', {
           attributes: ['*'],
@@ -719,7 +720,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
       }).to.throw(Error, 'Support for literal replacements in the `where` object has been removed.');
     });
 
-    test('raw string from where', () => {
+    it('raw string from where', () => {
       expect(() => {
         sql.selectQuery('User', {
           attributes: ['*'],
@@ -728,7 +729,7 @@ suite(Support.getTestDialectTeaser('SQL'), () => {
       }).to.throw(Error, 'Support for `{where: \'raw query\'}` has been removed.');
     });
 
-    test('raw string from having', () => {
+    it('raw string from having', () => {
       expect(() => {
         sql.selectQuery('User', {
           attributes: ['*'],

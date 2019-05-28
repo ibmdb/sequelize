@@ -25,10 +25,9 @@ We're glad to get pull request if any functionality is missing or something is b
 * Add some tests for your new functionality or a test exhibiting the bug you are solving. Ideally all new tests should not pass _without_ your changes.
   - Use [promise style](http://bluebirdjs.com/docs/why-promises.html) in all new tests. Specifically this means:
     - don't use `EventEmitter`, `QueryChainer` or the `success`, `done` and `error` events
-    - don't use nested callbacks (use [Promise.bind](http://bluebirdjs.com/docs/api/promise.bind.html) to maintain context in promise chains)
     - don't use a done callback in your test, just return the promise chain.
-  - Small bugfixes and direct backports to the 1.7 branch are accepted without tests.
-* If you are adding to / changing the public API, remember to add API docs, in the form of [JSDoc style](http://usejsdoc.org/about-getting-started.html) comments. See [section 4a](#4a-check-the-documentation  ) for the specifics.
+  - Small bugfixes and direct backports to the 4.x branch are accepted without tests.
+* If you are adding to / changing the public API, remember to add API docs, in the form of [JSDoc style](http://usejsdoc.org/about-getting-started.html) comments. See [section 4a](#4a-check-the-documentation) for the specifics.
 
 Interested? Coolio! Here is how to get started:
 
@@ -57,7 +56,7 @@ For MySQL this would look like this:
 $ echo "CREATE DATABASE sequelize_test;" | mysql -uroot
 ```
 
-**CLEVER NOTE:** by default, your local MySQL install must be with username `root` without password. If you want to customize that, you can set the environment variables `SEQ_DB`, `SEQ_USER`, `SEQ_PW`, `SEQ_HOST` and `SEQ_PORT`.
+**HINT:** by default, your local MySQL install must be with username `root` without password. If you want to customize that, you can set the environment variables `SEQ_DB`, `SEQ_USER`, `SEQ_PW`, `SEQ_HOST` and `SEQ_PORT`.
 
 For Postgres, creating the database and (optionally) adding the test user this would look like:
 
@@ -77,6 +76,7 @@ Create the following extensions in the test database:
 CREATE EXTENSION postgis;
 CREATE EXTENSION hstore;
 CREATE EXTENSION btree_gist;
+CREATE EXTENSION citext;
 ```
 
 #### 3.b Docker
@@ -88,15 +88,17 @@ If running on macOS, install [Docker for Mac](https://docs.docker.com/docker-for
 Now launch the docker mysql and postgres servers with this command (you can add `-d` to run them in daemon mode):
 
 ```sh
-$ docker-compose up postgres-95 mysql-57
+$ docker-compose up postgres-95 mysql-57 mssql
 ```
 
-Sequelize uses the sushantdhiman/postgres:9.5 Docker image for PostgreSQL, which installs the extensions required by tests: https://github.com/sushantdhiman/sequelize-postgres/blob/master/00-extensions.sql
+**MSSQL:** Please run `npm run setup-mssql` to create the test database.
+
+**POSTGRES:** Sequelize uses [special](https://github.com/sushantdhiman/sequelize-postgres) Docker image for PostgreSQL, which install all the extensions required by tests.
 
 ### 4. Running tests
 
 All tests are located in the `test` folder (which contains the
-lovely [Mocha](http://visionmedia.github.io/mocha/) tests).
+lovely [Mocha](https://mochajs.org/) tests).
 
 ```sh
 $ npm run test-all || test-mysql || test-sqlite || test-mssql || test-postgres || test-postgres-native
@@ -121,9 +123,7 @@ Example:
 
     feat(pencil): add 'graphiteWidth' option
 
-Commit messages are used to automatically generate a changelog, so make sure to follow the convention.
-If you are unsure, you can let [commitizen](https://github.com/commitizen/cz-cli) ask you questions and commit for you (just run `node_modules/.bin/git-cz`).
-When you commit, your commit message will be validated automatically with [validate-commit-msg](https://github.com/kentcdodds/validate-commit-msg).
+Commit messages are used to automatically generate a changelog. They will be validated automatically using [commitlint](https://github.com/marionebl/commitlint)
 
 Then push and send your pull request. Happy hacking and thank you for contributing.
 
@@ -131,9 +131,11 @@ Then push and send your pull request. Happy hacking and thank you for contributi
 
 Have a look at our [.eslintrc.json](https://github.com/sequelize/sequelize/blob/master/.eslintrc.json) file for the specifics. As part of the test process, all files will be linted, and your PR will **not** be accepted if it does not pass linting.
 
-# Publishing a release (For Maintainers)
+# Contributing to the documentation
 
-**Note:** _You really don't need this as Sequelize use semantic-release, Travis will automatically release new version_
+For contribution guidelines for the documentation, see [CONTRIBUTING.DOCS.md](https://github.com/sequelize/sequelize/blob/master/CONTRIBUTING.DOCS.md).
+
+# Publishing a release (For Maintainers)
 
 1. Ensure that latest build on master is green
 2. Ensure your local code is up to date (`git pull origin master`)

@@ -4,8 +4,8 @@ const chai  = require('chai'),
   expect    = chai.expect,
   sinon = require('sinon'),
   _         = require('lodash'),
-  Support   = require(__dirname + '/../support'),
-  DataTypes = require(__dirname + '/../../../lib/data-types'),
+  Support   = require('../support'),
+  DataTypes = require('../../../lib/data-types'),
   current   = Support.sequelize;
 
 describe(Support.getTestDialectTeaser('hasOne'), () => {
@@ -33,7 +33,7 @@ describe(Support.getTestDialectTeaser('hasOne'), () => {
     User.hasOne(Task);
     expect(Task.rawAttributes.UserId).not.to.be.empty;
 
-    User.hasOne(Task, {as: 'Shabda'});
+    User.hasOne(Task, { as: 'Shabda' });
     expect(Task.rawAttributes.ShabdaId).not.to.be.empty;
   });
 
@@ -71,7 +71,7 @@ describe(Support.getTestDialectTeaser('hasOne'), () => {
       it('should trigger', function() {
         const beforeAssociate = sinon.spy();
         this.Projects.beforeAssociate(beforeAssociate);
-        this.Projects.hasOne(this.Tasks, {hooks: true});
+        this.Projects.hasOne(this.Tasks, { hooks: true });
 
         const beforeAssociateArgs = beforeAssociate.getCall(0).args;
 
@@ -89,7 +89,7 @@ describe(Support.getTestDialectTeaser('hasOne'), () => {
       it('should not trigger association hooks', function() {
         const beforeAssociate = sinon.spy();
         this.Projects.beforeAssociate(beforeAssociate);
-        this.Projects.hasOne(this.Tasks, {hooks: false});
+        this.Projects.hasOne(this.Tasks, { hooks: false });
         expect(beforeAssociate).to.not.have.been.called;
       });
     });
@@ -97,7 +97,7 @@ describe(Support.getTestDialectTeaser('hasOne'), () => {
       it('should trigger', function() {
         const afterAssociate = sinon.spy();
         this.Projects.afterAssociate(afterAssociate);
-        this.Projects.hasOne(this.Tasks, {hooks: true});
+        this.Projects.hasOne(this.Tasks, { hooks: true });
 
         const afterAssociateArgs = afterAssociate.getCall(0).args;
 
@@ -117,7 +117,7 @@ describe(Support.getTestDialectTeaser('hasOne'), () => {
       it('should not trigger association hooks', function() {
         const afterAssociate = sinon.spy();
         this.Projects.afterAssociate(afterAssociate);
-        this.Projects.hasOne(this.Tasks, {hooks: false});
+        this.Projects.hasOne(this.Tasks, { hooks: false });
         expect(afterAssociate).to.not.have.been.called;
       });
     });

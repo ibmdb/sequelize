@@ -2,22 +2,14 @@
 
 const chai = require('chai'),
   expect = chai.expect,
-  Support = require(__dirname + '/support'),
-  Promise = require(__dirname + '/../../lib/promise'),
-  Transaction = require(__dirname + '/../../lib/transaction'),
-  sinon = require('sinon'),
+  Support = require('./support'),
+  Promise = require('../../lib/promise'),
+  Transaction = require('../../lib/transaction'),
   current = Support.sequelize;
 
 if (current.dialect.supports.transactions) {
 
   describe(Support.getTestDialectTeaser('Sequelize#transaction'), () => {
-    beforeEach(function() {
-      this.sinon = sinon.createSandbox();
-    });
-
-    afterEach(function() {
-      this.sinon.restore();
-    });
 
     describe('then', () => {
       it('gets triggered once a transaction has been successfully committed', function() {
@@ -51,7 +43,7 @@ if (current.dialect.supports.transactions) {
       if (Support.getTestDialect() !== 'sqlite' &&
           Support.getTestDialect() !== 'db2') {
         it('works for long running transactions', function() {
-          return Support.prepareTransactionTest(this.sequelize).bind(this).then(function(sequelize) {
+          return Support.prepareTransactionTest(this.sequelize).then(sequelize => {
             this.sequelize = sequelize;
 
             this.User = sequelize.define('User', {
@@ -59,9 +51,9 @@ if (current.dialect.supports.transactions) {
             }, { timestamps: false });
 
             return sequelize.sync({ force: true });
-          }).then(function() {
+          }).then(() => {
             return this.sequelize.transaction();
-          }).then(function(t) {
+          }).then(t => {
             let query = 'select sleep(2);';
 
             switch (Support.getTestDialect()) {
@@ -78,15 +70,15 @@ if (current.dialect.supports.transactions) {
                 break;
             }
 
-            return this.sequelize.query(query, { transaction: t }).bind(this).then(function() {
+            return this.sequelize.query(query, { transaction: t }).then(() => {
               return this.User.create({ name: 'foo' });
-            }).then(function() {
+            }).then(() => {
               return this.sequelize.query(query, { transaction: t });
             }).then(() => {
               return t.commit();
             });
-          }).then(function() {
-            return this.User.all();
+          }).then(() => {
+            return this.User.findAll();
           }).then(users => {
             expect(users.length).to.equal(1);
             expect(users[0].name).to.equal('foo');
@@ -99,7 +91,7 @@ if (current.dialect.supports.transactions) {
       it('works with promise syntax', function() {
         return Support.prepareTransactionTest(this.sequelize).then(sequelize => {
           const Test = sequelize.define('Test', {
-            id: { type: Support.Sequelize.INTEGER, primaryKey: true, autoIncrement: true},
+            id: { type: Support.Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
             name: { type: Support.Sequelize.STRING }
           });
 
@@ -128,29 +120,25 @@ if (current.dialect.supports.transactions) {
     describe('concurrency', () => {
       describe('having tables with uniqueness constraints', () => {
         beforeEach(function() {
-          const self = this;
-
           return Support.prepareTransactionTest(this.sequelize).then(sequelize => {
-            self.sequelize = sequelize;
+            this.sequelize = sequelize;
 
-            self.Model = sequelize.define('Model', {
+            this.Model = sequelize.define('Model', {
               name: { type: Support.Sequelize.STRING, unique: true }
             }, {
               timestamps: false
             });
 
-            return self.Model.sync({ force: true });
+            return this.Model.sync({ force: true });
           });
         });
 
         it('triggers the error event for the second transactions', function() {
-          const self = this;
-
           return this.sequelize.transaction().then(t1 => {
-            return self.sequelize.transaction().then(t2 => {
-              return self.Model.create({ name: 'omnom' }, { transaction: t1 }).then(() => {
+            return this.sequelize.transaction().then(t2 => {
+              return this.Model.create({ name: 'omnom' }, { transaction: t1 }).then(() => {
                 return Promise.all([
-                  self.Model.create({ name: 'omnom' }, { transaction: t2 }).catch(err => {
+                  this.Model.create({ name: 'omnom' }, { transaction: t2 }).catch(err => {
                     expect(err).to.be.ok;
                     return t2.rollback();
                   }),

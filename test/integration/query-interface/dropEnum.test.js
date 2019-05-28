@@ -2,8 +2,8 @@
 
 const chai = require('chai');
 const expect = chai.expect;
-const Support = require(__dirname + '/../support');
-const DataTypes = require(__dirname + '/../../../lib/data-types');
+const Support = require('../support');
+const DataTypes = require('../../../lib/data-types');
 const dialect = Support.getTestDialect();
 
 describe(Support.getTestDialectTeaser('QueryInterface'), () => {
@@ -13,7 +13,7 @@ describe(Support.getTestDialectTeaser('QueryInterface'), () => {
   });
 
   afterEach(function() {
-    return this.sequelize.dropAllSchemas();
+    return Support.dropTestSchemas(this.sequelize);
   });
 
   describe('dropEnum', () => {
@@ -36,7 +36,7 @@ describe(Support.getTestDialectTeaser('QueryInterface'), () => {
 
     if (dialect === 'postgres') {
       it('should be able to drop the specified enum', function() {
-        return this.queryInterface.removeColumn('menus', 'structuretype').bind(this).then(function() {
+        return this.queryInterface.removeColumn('menus', 'structuretype').then(() => {
           return this.queryInterface.pgListEnums('menus');
         }).then(enumList => {
           expect(enumList).to.have.lengthOf(1);
