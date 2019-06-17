@@ -1036,8 +1036,8 @@ describe(Support.getTestDialectTeaser('SQL'), () => {
 
     describe('DOUBLE PRECISION', () => {
       testsql('DOUBLE', DataTypes.DOUBLE, {
-        default: 'DOUBLE PRECISION',
-        db2: 'DOUBLE'
+        db2: 'DOUBLE',
+        default: 'DOUBLE PRECISION'
       });
 
       testsql('DOUBLE.UNSIGNED', DataTypes.DOUBLE.UNSIGNED, {

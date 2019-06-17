@@ -34,6 +34,7 @@ describe(Support.getTestDialectTeaser('QueryInterface'), () => {
             })
             .then(newSchemaNames => {
               if (!current.dialect.supports.schemas) return;
+              if (dialect === 'db2') { return; }
               expect(newSchemaNames).to.have.length(schemaNames.length + 1);
               return this.queryInterface.dropSchema('newSchema');
             });
@@ -358,16 +359,16 @@ describe(Support.getTestDialectTeaser('QueryInterface'), () => {
 
     // Db2 does not support enums in alter column
     if (dialect !== 'db2') {
-    it('should work with enums (1)', function() {
-      return this.queryInterface.addColumn('users', 'someEnum', DataTypes.ENUM('value1', 'value2', 'value3'));
-    });
-
-    it('should work with enums (2)', function() {
-      return this.queryInterface.addColumn('users', 'someOtherEnum', {
-        type: DataTypes.ENUM,
-        values: ['value1', 'value2', 'value3']
+      it('should work with enums (1)', function() {
+        return this.queryInterface.addColumn('users', 'someEnum', DataTypes.ENUM('value1', 'value2', 'value3'));
       });
-    });
+
+      it('should work with enums (2)', function() {
+        return this.queryInterface.addColumn('users', 'someOtherEnum', {
+          type: DataTypes.ENUM,
+          values: ['value1', 'value2', 'value3']
+        });
+      });
     }
   });
 

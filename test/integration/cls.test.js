@@ -156,12 +156,10 @@ if (current.dialect.supports.transactions) {
     });
 
     it('promises returned by sequelize.query are correctly patched', function() {
-      if(this.sequelize.options.dialect != 'db2') {
-        return this.sequelize.transaction(t =>
-          this.sequelize.query('select 1', { type: Sequelize.QueryTypes.SELECT})
-            .then(() => expect(this.ns.get('transaction')).to.equal(t))
-        );
-      }
+      return this.sequelize.transaction(t =>
+        this.sequelize.query('select 1', { type: Sequelize.QueryTypes.SELECT})
+          .then(() => expect(this.ns.get('transaction')).to.equal(t))
+      );
     });
   });
 }
