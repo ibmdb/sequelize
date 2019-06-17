@@ -231,6 +231,10 @@ describe(Support.getTestDialectTeaser('QueryInterface'), () => {
         });
 
         it('should change the comment of column', function() {
+          if (dialect === 'db2') {
+            // Db2 does not allow change of comment ALTER COLUMN
+            return;
+          }
           return this.queryInterface.describeTable({
             tableName: 'users'
           }).then(describedTable => {

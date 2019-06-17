@@ -1933,7 +1933,7 @@ describe(Support.getTestDialectTeaser('Model'), () => {
     });
 
     describe('aggregate', () => {
-      if (dialect === 'mssql') {
+      if (dialect === 'mssql' || dialect === 'db2') {
         return;
       }
       it('allows grouping by aliased attribute', function() {
@@ -2343,12 +2343,14 @@ describe(Support.getTestDialectTeaser('Model'), () => {
         // Postgres supports schemas natively
         switch (dialect) {
           case 'mssql':
-          case 'db2':
           case 'postgres':
             expect(schemas).to.have.length(2);
             break;
           case 'mariadb':
             expect(schemas).to.have.length(3);
+            break;
+          case 'db2':
+            expect(schemas.length).to.be.gte(2);
             break;
           default :
             expect(schemas).to.have.length(1);

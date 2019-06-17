@@ -285,7 +285,7 @@ describe(Support.getTestDialectTeaser('Sequelize'), () => {
         const spy = sinon.spy();
 
         return expect(this.User.create(payload).then(() => this.sequelize.query(`
-          INSERT INTO ${qq(this.User.tableName)} (username,${qq('createdAt')},${qq('updatedAt')}) VALUES ($username,$createdAt,$updatedAt);
+          INSERT INTO ${qq(this.User.tableName)} (${qq('username')},${qq('createdAt')},${qq('updatedAt')}) VALUES ($username,$createdAt,$updatedAt);
         `, {
           bind: payload,
           logging: spy,
@@ -296,7 +296,11 @@ describe(Support.getTestDialectTeaser('Sequelize'), () => {
             ]
           }
         }))).to.be.rejectedWith(Sequelize.UniqueConstraintError).then(() => {
-          expect(spy.callCount).to.eql(3);
+          if (dialect === 'db2') {
+            expect(spy.callCount).to.be.gte(1);
+          } else {
+            expect(spy.callCount).to.eql(3);
+          }
         });
       });
     });

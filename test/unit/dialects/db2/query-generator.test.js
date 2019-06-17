@@ -70,7 +70,7 @@ if (dialect === 'db2') {
         {
           title: 'Add column level comment',
           arguments: [{id: {type: 'INTEGER', comment: 'Test'}}],
-          expectation: {id: 'INTEGER'}
+          expectation: {id: 'INTEGER COMMENT Test'}
         },
         {
           arguments: [{id: {type: 'INTEGER', unique: true}}],
@@ -157,7 +157,7 @@ if (dialect === 'db2') {
         },
         {
           arguments: ['myTable', {title: 'VARCHAR(255)', name: 'VARCHAR(255)'}, {uniqueKeys: [{fields: ['title', 'name'], customIndex: true}]}],
-          expectation: 'CREATE TABLE "myTable" ("title" VARCHAR(255), "name" VARCHAR(255), CONSTRAINT "uniq_myTable_title_name" UNIQUE ("title", "name"));'
+          expectation: 'CREATE TABLE "myTable" ("title" VARCHAR(255) NOT NULL, "name" VARCHAR(255) NOT NULL, CONSTRAINT "uniq_myTable_title_name" UNIQUE ("title", "name"));'
         }
       ],
 
