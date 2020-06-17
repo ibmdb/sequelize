@@ -20,13 +20,16 @@ New to Sequelize? Take a look at the [Tutorials and Guides](https://sequelize.or
 
 ## Installation
 
+* **git** - should be installed in the system.
+* For ibm_db, please check: https://github.com/ibmdb/node-ibm_db#prerequisite
+
 ```bash
-$ npm install --save sequelize # This will install v5
-$ npm install --save sequelize@next # This will install v6-beta
+$ npm install --save git+https://git@github.com/ibmdb/sequelize.git#db2_support
 
 # And one of the following:
 $ npm install --save pg pg-hstore # Postgres
 $ npm install --save mysql2
+$ npm install --save ibm_db # Db2
 $ npm install --save mariadb
 $ npm install --save sqlite3
 $ npm install --save tedious # Microsoft SQL Server
