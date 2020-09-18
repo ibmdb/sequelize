@@ -12,43 +12,46 @@ Sequelize is a promise-based Node.js ORM for Postgres, MySQL, MariaDB, SQLite an
 
 New to Sequelize? Take a look at the [Tutorials and Guides](https://sequelize.org/master). You might also be interested in the [API Reference](https://sequelize.org/master/identifiers).
 
-### v6-beta Release
+## Release
 
-[![npm version](https://badgen.net/npm/v/sequelize/next)](https://www.npmjs.com/package/sequelize)
+**v6** release is now available under `@latest` tag. You can find detailed changelog [here](https://github.com/sequelize/sequelize/blob/v6/docs/manual/other-topics/upgrade-to-v6.md).
 
-`v6-beta` is now available. You can find detailed changelog [here](https://github.com/sequelize/sequelize/blob/master/docs/manual/other-topics/upgrade-to-v6.md).
+__Note:__ `master` branch points to experimental version not suitable for production. All documentation PRs should be opened for `v6` branch. All bug-fix / feature PRs should be opened for `master` branch first, then for their release target branches i.e. `v6` or `v5`.
 
 ## Installation
 
 * **git** - should be installed in the system.
 * For ibm_db, please check: https://github.com/ibmdb/node-ibm_db#prerequisite
 
-```bash
+```sh
 $ npm install --save git+https://git@github.com/ibmdb/sequelize.git#db2_support
 
 # And one of the following:
-$ npm install --save pg pg-hstore # Postgres
-$ npm install --save mysql2
-$ npm install --save ibm_db # Db2
-$ npm install --save mariadb
-$ npm install --save sqlite3
-$ npm install --save tedious # Microsoft SQL Server
+$ npm i pg pg-hstore # Postgres
+$ npm i mysql2
+$ npm i mariadb
+$ npm i sqlite3
+$ npm i tedious # Microsoft SQL Server
 ```
 
 ## Documentation
-- [v6-beta Documentation](https://sequelize.org/master)
+
+- [v6 Documentation](https://sequelize.org/master)
 - [v5/v4/v3 Documentation](https://sequelize.org)
 - [Contributing](https://github.com/sequelize/sequelize/blob/master/CONTRIBUTING.md)
 
 ## Responsible disclosure
+
 If you have security issues to report, please refer to our [Responsible Disclosure Policy](https://github.com/sequelize/sequelize/blob/master/SECURITY.md) for more details.
 
 ## Resources
+
 - [Changelog](https://github.com/sequelize/sequelize/releases)
-- [Slack](http://sequelize-slack.herokuapp.com/)
+- [Slack Inviter](http://sequelize-slack.herokuapp.com/)
 - [Stack Overflow](https://stackoverflow.com/questions/tagged/sequelize.js)
 
 ### Tools
+
 - [CLI](https://github.com/sequelize/cli)
 - [With TypeScript](https://sequelize.org/master/manual/typescript.html)
 - [Enhanced TypeScript with decorators](https://github.com/RobinBuschmann/sequelize-typescript)
@@ -57,5 +60,6 @@ If you have security issues to report, please refer to our [Responsible Disclosu
 - [Plugins](https://sequelize.org/master/manual/resources.html)
 
 ### Translations
+
 - [English](https://sequelize.org/master) (OFFICIAL)
 - [中文文档](https://github.com/demopark/sequelize-docs-Zh-CN) (UNOFFICIAL)

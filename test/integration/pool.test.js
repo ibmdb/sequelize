@@ -6,6 +6,7 @@ const Support = require('./support');
 const dialect = Support.getTestDialect();
 const sinon = require('sinon');
 const Sequelize = Support.Sequelize;
+const delay = require('delay');
 
 function assertSameConnection(newConnection, oldConnection) {
   switch (dialect) {
@@ -19,7 +20,7 @@ function assertSameConnection(newConnection, oldConnection) {
       break;
 
     case 'mssql':
-      expect(newConnection.unwrap().dummyId).to.equal(oldConnection.unwrap().dummyId).and.to.be.ok;
+      expect(newConnection.dummyId).to.equal(oldConnection.dummyId).and.to.be.ok;
       break;
 
     default:
@@ -39,8 +40,8 @@ function assertNewConnection(newConnection, oldConnection) {
       break;
 
     case 'mssql':
-      expect(newConnection.unwrap().dummyId).to.not.be.ok;
-      expect(oldConnection.unwrap().dummyId).to.be.ok;
+      expect(newConnection.dummyId).to.not.be.ok;
+      expect(oldConnection.dummyId).to.be.ok;
       break;
 
     default:
@@ -48,9 +49,8 @@ function assertNewConnection(newConnection, oldConnection) {
   }
 }
 
-function unwrapAndAttachMSSQLUniqueId(connection) {
+function attachMSSQLUniqueId(connection) {
   if (dialect === 'mssql') {
-    connection = connection.unwrap();
     connection.dummyId = Math.random();
   }
 
@@ -60,11 +60,11 @@ function unwrapAndAttachMSSQLUniqueId(connection) {
 describe(Support.getTestDialectTeaser('Pooling'), () => {
   if (dialect === 'sqlite' || process.env.DIALECT === 'postgres-native') return;
 
-  beforeEach(function() {
+  beforeEach(function () {
     this.sinon = sinon.createSandbox();
   });
 
-  afterEach(function() {
+  afterEach(function () {
     this.sinon.restore();
   });
 
@@ -73,7 +73,7 @@ describe(Support.getTestDialectTeaser('Pooling'), () => {
       function simulateUnexpectedError(connection) {
         // should never be returned again
         if (dialect === 'mssql') {
-          connection = unwrapAndAttachMSSQLUniqueId(connection);
+          connection = attachMSSQLUniqueId(connection);
         }
         connection.emit('error', { code: 'ECONNRESET' });
       }
@@ -99,7 +99,7 @@ describe(Support.getTestDialectTeaser('Pooling'), () => {
       function simulateUnexpectedError(connection) {
         // should never be returned again
         if (dialect === 'mssql') {
-          unwrapAndAttachMSSQLUniqueId(connection).close();
+          attachMSSQLUniqueId(connection).close();
         } else if (dialect === 'postgres') {
           connection.end();
         } else {
@@ -137,13 +137,13 @@ describe(Support.getTestDialectTeaser('Pooling'), () => {
       const firstConnection = await cm.getConnection();
 
       // TODO - Do we really need this call?
-      unwrapAndAttachMSSQLUniqueId(firstConnection);
+      attachMSSQLUniqueId(firstConnection);
 
       // returning connection back to pool
       await cm.releaseConnection(firstConnection);
 
       // Wait a little and then get next available connection
-      await Sequelize.Promise.delay(90);
+      await delay(90);
       const secondConnection = await cm.getConnection();
 
       assertSameConnection(secondConnection, firstConnection);
@@ -162,13 +162,13 @@ describe(Support.getTestDialectTeaser('Pooling'), () => {
       const firstConnection = await cm.getConnection();
 
       // TODO - Do we really need this call?
-      unwrapAndAttachMSSQLUniqueId(firstConnection);
+      attachMSSQLUniqueId(firstConnection);
 
       // returning connection back to pool
       await cm.releaseConnection(firstConnection);
 
       // Wait a little and then get next available connection
-      await Sequelize.Promise.delay(110);
+      await delay(110);
 
       const secondConnection = await cm.getConnection();
 
@@ -180,7 +180,7 @@ describe(Support.getTestDialectTeaser('Pooling'), () => {
   });
 
   describe('acquire', () => {
-    it('should reject with ConnectionAcquireTimeoutError when unable to acquire connection', async function() {
+    it('should reject with ConnectionAcquireTimeoutError when unable to acquire connection', async function () {
       this.testInstance = new Sequelize('localhost', 'ffd', 'dfdf', {
         dialect,
         databaseVersion: '1.2.3',
@@ -189,15 +189,14 @@ describe(Support.getTestDialectTeaser('Pooling'), () => {
         }
       });
 
-      this.sinon.stub(this.testInstance.connectionManager, '_connect')
-        .returns(new Sequelize.Promise(() => {}));
+      this.sinon.stub(this.testInstance.connectionManager, '_connect').returns(new Promise(() => {}));
 
-      await expect(
-        this.testInstance.authenticate()
-      ).to.eventually.be.rejectedWith(Sequelize.ConnectionAcquireTimeoutError);
+      await expect(this.testInstance.authenticate()).to.eventually.be.rejectedWith(
+        Sequelize.ConnectionAcquireTimeoutError
+      );
     });
 
-    it('should reject with ConnectionAcquireTimeoutError when unable to acquire connection for transaction', async function() {
+    it('should reject with ConnectionAcquireTimeoutError when unable to acquire connection for transaction', async function () {
       this.testInstance = new Sequelize('localhost', 'ffd', 'dfdf', {
         dialect,
         databaseVersion: '1.2.3',
@@ -207,8 +206,7 @@ describe(Support.getTestDialectTeaser('Pooling'), () => {
         }
       });
 
-      this.sinon.stub(this.testInstance.connectionManager, '_connect')
-        .returns(new Sequelize.Promise(() => {}));
+      this.sinon.stub(this.testInstance.connectionManager, '_connect').returns(new Promise(() => {}));
 
       await expect(
         this.testInstance.transaction(async () => {
